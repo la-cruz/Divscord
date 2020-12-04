@@ -14,76 +14,135 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const peerConnection = {
+  peer: null,
+  connection: null,
+};
+
 function DataChat() {
   const classes = useStyles();
-  const [startAvailable, setStartAvailable] = useState(true);
-  const [sendAvailable, setSendAvailable] = useState(false);
-  const [hangupAvailable, setHangupAvailable] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [sender, setSender] = useState('');
   const [receiver, setReceiver] = useState('');
   const [message, setMessage] = useState('');
+  const [messageList, setMessageList] = useState([]);
+  const [errors, setErrors] = useState({
+    sender: 'no error',
+    receiver: 'no error',
+    message: 'no error',
+  });
+
+  const addMessageToList = (messageToAdd) => {
+    setMessageList([...messageList, messageToAdd]);
+  };
 
   const start = () => {
-    setStartAvailable(false);
-    setSendAvailable(true);
-    setHangupAvailable(true);
+    const newErrors = {
+      sender: sender === '' ? 'Empty username' : 'no error',
+      receiver: receiver === '' ? 'Empty receiver' : 'no error',
+      message: 'no error',
+    };
 
-    const peer = newPeerConnection(sender);
+    setErrors(newErrors);
 
-    peer.on('open', (id) => {
-      console.log(`my id is ${id}`);
+    if (newErrors.sender !== 'no error' || newErrors.receiver !== 'no error') {
+      return;
+    }
+
+    setIsConnected(true);
+
+    peerConnection.peer = newPeerConnection(sender);
+    peerConnection.connection = peerConnection.peer.connect(receiver);
+
+    peerConnection.peer.on('open', () => {
     });
 
-    peer.on('connection', (incConnection) => {
-    // Receive messages
-      incConnection.on('data', (data) => {
-        console.log('Received', data);
+    peerConnection.peer.on('connection', (conn) => {
+      conn.on('data', (data) => {
+        console.log('message : ', data);
+
+        const newMessage = {
+          author: receiver,
+          message: data,
+        };
+
+        addMessageToList(newMessage);
       });
-
-      // Send messages
-      incConnection.send('coucou');
     });
-
-    peer.connect(receiver);
   };
 
   const send = () => {
+    const newMessage = {
+      author: sender,
+      message,
+    };
 
+    setMessageList([...messageList, newMessage]);
+    peerConnection.connection.send(message);
+    setMessage('');
   };
 
   const hangUp = () => {
-    setHangupAvailable(false);
-    setSendAvailable(false);
-    setStartAvailable(true);
+    peerConnection.peer.disconnect();
+    setIsConnected(false);
   };
 
   return (
     <div>
       <ButtonGroup size="large" color="primary" aria-label="large outlined primary button group">
-        <Button onClick={start} disabled={!startAvailable}>
+        <Button onClick={start} disabled={isConnected}>
           Start
         </Button>
-        <Button onClick={send} disabled={!sendAvailable}>
+        <Button onClick={send} disabled={!isConnected}>
           Send
         </Button>
-        <Button onClick={hangUp} disabled={!hangupAvailable}>
+        <Button onClick={hangUp} disabled={!isConnected}>
           Hang Up
         </Button>
       </ButtonGroup>
       <form className={classes.root} onSubmit={(e) => { e.preventDefault(); }}>
-        <TextField label="Username" variant="outlined" value={sender} onChange={(e) => { setSender(e.target.value); }} />
-        <TextField label="Receiver" variant="outlined" value={receiver} onChange={(e) => { setReceiver(e.target.value); }} />
-        <div className="message-flow">
-          <span>coucou</span>
-        </div>
         <TextField
-          label="Message"
-          multiline
-          rows={2}
+          error={errors.sender !== 'no error'}
+          helperText={errors.sender !== 'no error' ? errors.sender : ''}
+          label="Username"
           variant="outlined"
-          value={message}
-          onChange={(e) => { setMessage(e.target.value); }}
+          value={sender}
+          disabled={isConnected}
+          onChange={(e) => { setSender(e.target.value); }}
         />
+        <TextField
+          error={errors.receiver !== 'no error'}
+          helperText={errors.receiver !== 'no error' ? errors.receiver : ''}
+          label="Receiver"
+          variant="outlined"
+          value={receiver}
+          disabled={isConnected}
+          onChange={(e) => { setReceiver(e.target.value); }}
+        />
+        <div className="message-flow">
+          {
+            messageList.map((elem) => (
+              <span key={elem.message}>
+                {elem.author}
+                {' : '}
+                {elem.message}
+              </span>
+            ))
+          }
+        </div>
+        {
+          isConnected
+          && (
+            <TextField
+              label="Message"
+              multiline
+              rowsMax={2}
+              variant="outlined"
+              value={message}
+              onChange={(e) => { setMessage(e.target.value); }}
+            />
+          )
+        }
       </form>
     </div>
   );
