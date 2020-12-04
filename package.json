@@ -11,17 +11,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://forge.univ-lyon1.fr/p1509529/tws_stack.git"
+    "url": "https://forge.univ-lyon1.fr/p1509529/tws-tp3.git"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bootstrap": "^4.5.2",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
     "eslint-loader": "^4.0.2",
     "express": "^4.17.1",
     "node": "^14.8.0",
+    "peer": "^0.6.1",
+    "peerjs": "^1.3.1",
+    "prop-types": "^15.7.2",
     "react": "^16.13.1",
-    "react-bootstrap": "^1.3.0",
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
