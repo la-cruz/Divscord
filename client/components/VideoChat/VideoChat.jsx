@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
 const peerConnection = {
   peer: null,
   connection: null,
+  callEmitted: null,
   callReceived: null,
 };
 
@@ -82,12 +83,12 @@ function VideoChat() {
                       || navigator.webkitGetUserMedia
                       || navigator.mozGetUserMedia;
     getUserMedia({ video: true, audio: true }, (stream) => {
-      peerConnection.callReceived = peerConnection.peer.call(receiver, stream);
-      peerConnection.callReceived.on('stream', (remoteStream) => {
+      peerConnection.callEmitted = peerConnection.peer.call(receiver, stream);
+      peerConnection.callEmitted.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
       });
 
-      peerConnection.callReceived.on('close', () => {
+      peerConnection.callEmitted.on('close', () => {
         console.log('connection fermé');
       });
     }, (err) => {
@@ -100,6 +101,12 @@ function VideoChat() {
         callReceived.on('stream', (remoteStream) => {
           gotRemoteStream(remoteStream);
         });
+
+        callReceived.on('close', () => {
+          console.log('je ferme l\'appel');
+        });
+
+        peerConnection.callReceived = callReceived;
       }, (err) => {
         console.log('Failed to get local stream', err);
       });
@@ -107,8 +114,14 @@ function VideoChat() {
   };
 
   const hangUp = () => {
-    // peerConnection.peer.disconnect();
-    peerConnection.callReceived.close();
+    peerConnection.peer.disconnect();
+    if (peerConnection.callEmitted) {
+      peerConnection.callEmitted.close();
+    }
+
+    if (peerConnection.callReceived) {
+      peerConnection.callReceived.close();
+    }
     peerConnection.connection.close();
     gotRemoteStream(null);
     setStart(true);
