@@ -3,7 +3,16 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Slide from '@material-ui/core/Slide';
 import newPeerConnection from '../../lib/newPeerConnection';
+
+const Transition = React.forwardRef((props, ref) => (
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  <Slide direction="up" ref={ref} {...props} />
+));
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,6 +35,7 @@ function VideoChat() {
   const localVideoRef = useRef();
   const localStreamRef = useRef();
   const remoteVideoRef = useRef();
+  const [openModal, setOpenModal] = useState(false);
   const [startAvailable, setStart] = useState(true);
   const [callAvailable, setCall] = useState(false);
   const [hangupAvailable, setHangup] = useState(false);
@@ -54,6 +64,12 @@ function VideoChat() {
     if (peerConnection.callEmitted) {
       peerConnection.callEmitted.close();
     }
+
+    if (peerConnection.callReceived) {
+      peerConnection.callReceived.close();
+    }
+
+    peerConnection.peer.disconnect();
 
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => {
@@ -87,12 +103,22 @@ function VideoChat() {
 
     if (peerConnection.connection === null) {
       peerConnection.connection = peerConnection.peer.connect(receiver);
+    } else {
+      peerConnection.connection = peerConnection.peer.reconnect(receiver);
     }
 
     peerConnection.peer.on('connection', (conn) => {
       conn.on('data', (data) => {
-        if (data.type === 'DISCONNECTED') {
-          disconnect();
+        switch (data.type) {
+          case 'DISCONNECT':
+            disconnect();
+            break;
+          case 'CALLING':
+            console.log('je reçoi le message de call');
+            setOpenModal(true);
+            break;
+          default:
+            break;
         }
       });
     });
@@ -114,15 +140,24 @@ function VideoChat() {
                       || navigator.webkitGetUserMedia
                       || navigator.mozGetUserMedia;
     getUserMedia({ video: true, audio: true }, (stream) => {
+      console.log('jenvoie un call');
       peerConnection.callEmitted = peerConnection.peer.call(receiver, stream);
       peerConnection.callEmitted.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
       });
+
+      if (!openModal) {
+        console.log('jenvoie le message de call');
+        peerConnection.connection.send({
+          type: 'CALLING',
+        });
+      }
     }, (err) => {
       console.log('Failed to get local stream', err);
     });
 
     peerConnection.peer.on('call', (callReceived) => {
+      console.log('je reçois un call');
       getUserMedia({ video: true, audio: true }, (stream) => {
         callReceived.answer(stream);
         callReceived.on('stream', (remoteStream) => {
@@ -137,8 +172,12 @@ function VideoChat() {
   };
 
   const hangUp = () => {
-    peerConnection.connection.send({ type: 'DISCONNECTED' });
+    peerConnection.connection.send({ type: 'DISCONNECT' });
     disconnect();
+  };
+
+  const cancelCall = () => {
+
   };
 
   return (
@@ -180,6 +219,27 @@ function VideoChat() {
       <video ref={remoteVideoRef} autoPlay>
         <track kind="captions" srcLang="en" label="english_captions" />
       </video>
+      <Dialog
+        open={openModal}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={() => { setOpenModal(false); }}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">
+          { receiver }
+          wants to call
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => { cancelCall(); setOpenModal(false); }} color="primary">
+            Hang up
+          </Button>
+          <Button onClick={() => { call(); setOpenModal(false); }} color="primary">
+            Pick up
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
