@@ -58,14 +58,19 @@ function DataChat() {
     peerConnection.peer = newPeerConnection(sender);
     peerConnection.connection = peerConnection.peer.connect(receiver);
 
+    peerConnection.peer.on('connection', () => { console.log('connected to ', receiver); });
+
     peerConnection.peer.on('connection', (conn) => {
       conn.on('data', (data) => {
-        const newMessage = {
-          author: false,
-          message: data,
-        };
+        console.log('message : ', data);
 
-        setMessageList((oldArray) => [...oldArray, newMessage]);
+        if (data.type === 'MESSAGE') {
+          const newMessage = {
+            author: false,
+            message: data.data,
+          };
+          setMessageList((oldArray) => [...oldArray, newMessage]);
+        }
       });
     });
   };
@@ -81,7 +86,10 @@ function DataChat() {
     };
 
     setMessageList([...messageList, newMessage]);
-    peerConnection.connection.send(message);
+    peerConnection.connection.send({
+      type: 'MESSAGE',
+      data: message,
+    });
     setMessage('');
   };
 

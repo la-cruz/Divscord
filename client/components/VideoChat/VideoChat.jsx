@@ -51,18 +51,16 @@ function VideoChat() {
   };
 
   const disconnect = () => {
-    console.log('allo');
-
     if (peerConnection.callEmitted) {
       peerConnection.callEmitted.close();
     }
 
-    if (peerConnection.callReceived) {
-      peerConnection.callReceived.close();
-    }
+    // if (peerConnection.callReceived) {
+    //   peerConnection.callReceived.close();
+    // }
 
-    peerConnection.connection.close();
-    peerConnection.peer.destroy();
+    // peerConnection.connection.close();
+    // peerConnection.peer.destroy();
 
     localStreamRef.current.getTracks().forEach((track) => {
       track.stop();

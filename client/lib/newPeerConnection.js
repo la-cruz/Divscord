@@ -5,4 +5,10 @@ export default function newPeerConnection(id) {
     host: 'chat-alves-audart.herokuapp.com',
     path: '/mypeer',
   });
+
+  // return new Peer(id, {
+  //   host: 'localhost',
+  //   port: 3000,
+  //   path: '/mypeer',
+  // });
 }
