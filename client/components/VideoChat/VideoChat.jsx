@@ -50,6 +50,36 @@ function VideoChat() {
     }
   };
 
+  const disconnect = () => {
+    console.log('allo');
+
+    if (peerConnection.callEmitted) {
+      peerConnection.callEmitted.close();
+    }
+
+    if (peerConnection.callReceived) {
+      peerConnection.callReceived.close();
+    }
+
+    peerConnection.connection.close();
+    peerConnection.peer.destroy();
+
+    localStreamRef.current.getTracks().forEach((track) => {
+      track.stop();
+    });
+
+    gotRemoteStream(null);
+    gotStream(null);
+    setStart(true);
+    setCall(false);
+    setHangup(false);
+
+    peerConnection.peer = null;
+    peerConnection.callEmitted = null;
+    peerConnection.callReceived = null;
+    peerConnection.connection = null;
+  };
+
   const start = () => {
     const newErrors = {
       sender: sender === '' ? 'Empty username' : 'no error',
@@ -65,6 +95,16 @@ function VideoChat() {
 
     peerConnection.peer = newPeerConnection(sender);
     peerConnection.connection = peerConnection.peer.connect(receiver);
+
+    peerConnection.peer.on('connection', (conn) => {
+      conn.on('data', (data) => {
+        console.log(data);
+
+        if (data.type === 'DISCONNECTED') {
+          disconnect();
+        }
+      });
+    });
 
     setStart(false);
     navigator.mediaDevices
@@ -87,10 +127,6 @@ function VideoChat() {
       peerConnection.callEmitted.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
       });
-
-      peerConnection.callEmitted.on('close', () => {
-        console.log('connection fermé');
-      });
     }, (err) => {
       console.log('Failed to get local stream', err);
     });
@@ -102,10 +138,6 @@ function VideoChat() {
           gotRemoteStream(remoteStream);
         });
 
-        callReceived.on('close', () => {
-          console.log('je ferme l\'appel');
-        });
-
         peerConnection.callReceived = callReceived;
       }, (err) => {
         console.log('Failed to get local stream', err);
@@ -114,19 +146,8 @@ function VideoChat() {
   };
 
   const hangUp = () => {
-    peerConnection.peer.disconnect();
-    if (peerConnection.callEmitted) {
-      peerConnection.callEmitted.close();
-    }
-
-    if (peerConnection.callReceived) {
-      peerConnection.callReceived.close();
-    }
-    peerConnection.connection.close();
-    gotRemoteStream(null);
-    setStart(true);
-    setCall(false);
-    setHangup(false);
+    peerConnection.connection.send({ type: 'DISCONNECTED' });
+    // setTimeout(() => { disconnect(); }, 5000);
   };
 
   return (
