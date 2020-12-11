@@ -55,27 +55,17 @@ function VideoChat() {
       peerConnection.callEmitted.close();
     }
 
-    // if (peerConnection.callReceived) {
-    //   peerConnection.callReceived.close();
-    // }
-
-    // peerConnection.connection.close();
-    // peerConnection.peer.destroy();
-
-    localStreamRef.current.getTracks().forEach((track) => {
-      track.stop();
-    });
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
 
     gotRemoteStream(null);
     gotStream(null);
     setStart(true);
     setCall(false);
     setHangup(false);
-
-    peerConnection.peer = null;
-    peerConnection.callEmitted = null;
-    peerConnection.callReceived = null;
-    peerConnection.connection = null;
   };
 
   const start = () => {
@@ -91,13 +81,16 @@ function VideoChat() {
       return;
     }
 
-    peerConnection.peer = newPeerConnection(sender);
-    peerConnection.connection = peerConnection.peer.connect(receiver);
+    if (peerConnection.peer === null) {
+      peerConnection.peer = newPeerConnection(sender);
+    }
+
+    if (peerConnection.connection === null) {
+      peerConnection.connection = peerConnection.peer.connect(receiver);
+    }
 
     peerConnection.peer.on('connection', (conn) => {
       conn.on('data', (data) => {
-        console.log(data);
-
         if (data.type === 'DISCONNECTED') {
           disconnect();
         }
@@ -145,7 +138,7 @@ function VideoChat() {
 
   const hangUp = () => {
     peerConnection.connection.send({ type: 'DISCONNECTED' });
-    // setTimeout(() => { disconnect(); }, 5000);
+    disconnect();
   };
 
   return (
