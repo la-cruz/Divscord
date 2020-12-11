@@ -1,0 +1,28 @@
+.message-flow {
+  display: flex;
+  flex-direction: column;
+  border: solid 1px black;
+  padding: 1rem;
+  height: 200px;
+  overflow-y: scroll;
+
+  span {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    margin: 0.2rem 0;
+    position: relative;
+
+    &.author {
+      align-self: flex-end;
+      background-color: $color-blue;
+      color: white;
+      border-bottom-right-radius: 0px;
+    }
+
+    &.other {
+      align-self: flex-start;
+      background-color: beige;
+      border-bottom-left-radius: 0px;
+    }
+  }
+}

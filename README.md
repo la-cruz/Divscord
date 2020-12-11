@@ -33,3 +33,12 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 ### `npm run dev`
 
 Run the webpack command to bundle your app with the watch option
+
+### Note pour l'instant uesh
+
+Ajout de l'appuis sur entrée pour valider son message et shift + entrée pour aller a la ligne
+Key avec aléatoire pour les message
+scroll auto div
+Bouton send en dehors du bouton group pour des problème d'ux/ui
+passage des 3 bool en 1
+

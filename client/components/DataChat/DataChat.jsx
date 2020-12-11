@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';
@@ -32,9 +32,13 @@ function DataChat() {
     message: 'no error',
   });
 
-  const addMessageToList = (messageToAdd) => {
-    setMessageList([...messageList, messageToAdd]);
+  const endOfContainer = useRef();
+
+  const scrollToBottom = () => {
+    endOfContainer.current.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(scrollToBottom, [messageList]);
 
   const start = () => {
     const newErrors = {
@@ -59,21 +63,23 @@ function DataChat() {
 
     peerConnection.peer.on('connection', (conn) => {
       conn.on('data', (data) => {
-        console.log('message : ', data);
-
         const newMessage = {
-          author: receiver,
+          author: false,
           message: data,
         };
 
-        addMessageToList(newMessage);
+        setMessageList((oldArray) => [...oldArray, newMessage]);
       });
     });
   };
 
   const send = () => {
+    if (message === '') {
+      return;
+    }
+
     const newMessage = {
-      author: sender,
+      author: true,
       message,
     };
 
@@ -87,14 +93,18 @@ function DataChat() {
     setIsConnected(false);
   };
 
+  const handleSpacePress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  };
+
   return (
     <div>
       <ButtonGroup size="large" color="primary" aria-label="large outlined primary button group">
         <Button onClick={start} disabled={isConnected}>
           Start
-        </Button>
-        <Button onClick={send} disabled={!isConnected}>
-          Send
         </Button>
         <Button onClick={hangUp} disabled={!isConnected}>
           Hang Up
@@ -122,25 +132,30 @@ function DataChat() {
         <div className="message-flow">
           {
             messageList.map((elem) => (
-              <span key={elem.message}>
-                {elem.author}
-                {' : '}
+              <span className={elem.author ? 'author' : 'other'} key={elem.message + Math.random().toString(36).substr(2, 5)}>
                 {elem.message}
               </span>
             ))
           }
+          <div ref={endOfContainer} />
         </div>
         {
           isConnected
           && (
-            <TextField
-              label="Message"
-              multiline
-              rowsMax={2}
-              variant="outlined"
-              value={message}
-              onChange={(e) => { setMessage(e.target.value); }}
-            />
+            <>
+              <TextField
+                label="Message"
+                multiline
+                rowsMax={2}
+                variant="outlined"
+                value={message}
+                onChange={(e) => { setMessage(e.target.value); }}
+                onKeyPress={(e) => { handleSpacePress(e); }}
+              />
+              <Button onClick={send} variant="outlined" size="large" color="primary">
+                Send
+              </Button>
+            </>
           )
         }
       </form>

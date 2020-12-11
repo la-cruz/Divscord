@@ -29,6 +29,10 @@ module.exports = () => (
           loader: 'file-loader',
           options: { name: '/static/[name].[ext]' },
         },
+        {
+          test: /\.(s[ac]ss)$/i,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
+        },
       ],
     },
   }
