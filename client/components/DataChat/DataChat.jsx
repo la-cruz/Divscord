@@ -58,9 +58,6 @@ function DataChat() {
     peerConnection.peer = newPeerConnection(sender);
     peerConnection.connection = peerConnection.peer.connect(receiver);
 
-    peerConnection.peer.on('open', () => {
-    });
-
     peerConnection.peer.on('connection', (conn) => {
       conn.on('data', (data) => {
         const newMessage = {
