@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme) => ({
 const peerConnection = {
   peer: null,
   connection: null,
+  callReceived: null,
 };
 
 function VideoChat() {
@@ -81,9 +82,13 @@ function VideoChat() {
                       || navigator.webkitGetUserMedia
                       || navigator.mozGetUserMedia;
     getUserMedia({ video: true, audio: true }, (stream) => {
-      const callReceived = peerConnection.peer.call(receiver, stream);
-      callReceived.on('stream', (remoteStream) => {
+      peerConnection.callReceived = peerConnection.peer.call(receiver, stream);
+      peerConnection.callReceived.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
+      });
+
+      peerConnection.callReceived.on('close', () => {
+        console.log('connection fermé');
       });
     }, (err) => {
       console.log('Failed to get local stream', err);
@@ -91,7 +96,7 @@ function VideoChat() {
 
     peerConnection.peer.on('call', (callReceived) => {
       getUserMedia({ video: true, audio: true }, (stream) => {
-        callReceived.answer(stream); // Answer the call with an A/V stream.
+        callReceived.answer(stream);
         callReceived.on('stream', (remoteStream) => {
           gotRemoteStream(remoteStream);
         });
@@ -99,27 +104,13 @@ function VideoChat() {
         console.log('Failed to get local stream', err);
       });
     });
-
-    peerConnection.peer.on('close', () => {
-      console.log('je raccroche on close peer call');
-      peerConnection.peer.destroy();
-    });
-
-    peerConnection.peer.on('disconnected', () => {
-      console.log('je raccroche on disconnected call');
-      peerConnection.peer.destroy();
-    });
-
-    peerConnection.connection.on('close', () => {
-      console.log('je raccroche on close connection');
-      peerConnection.peer.destroy();
-    });
   };
 
   const hangUp = () => {
-    peerConnection.peer.disconnect();
-    peerConnection.peer.destroy();
+    // peerConnection.peer.disconnect();
+    peerConnection.callReceived.close();
     peerConnection.connection.close();
+    gotRemoteStream(null);
     setStart(true);
     setCall(false);
     setHangup(false);
