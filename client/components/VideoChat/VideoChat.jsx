@@ -1,12 +1,17 @@
 import React, { useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Box from '@material-ui/core/Box';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
+import CallIcon from '@material-ui/icons/Call';
+import CallEndRoundedIcon from '@material-ui/icons/CallEndRounded';
+import PlayCircleFilledWhiteIcon from '@material-ui/icons/PlayCircleFilledWhite';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
+import Button from '@material-ui/core/Button';
 import newPeerConnection from '../../lib/newPeerConnection';
 
 const Transition = React.forwardRef((props, ref) => (
@@ -14,12 +19,34 @@ const Transition = React.forwardRef((props, ref) => (
   <Slide direction="up" ref={ref} {...props} />
 ));
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   root: {
-    '& > *': {
-      margin: theme.spacing(1),
-      width: '25ch',
+    minHeight: '10vh',
+    flexGrow: 1,
+  },
+  headerChat: {
+    flexBasis: '100px',
+    width: '100%',
+  },
+  containerInput: {
+    padding: '0.5rem 0.5rem',
+  },
+  input: {
+    width: '100%',
+  },
+  gridHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    color: '#4389a2',
+    '&:disabled': {
+      color: 'grey',
     },
+  },
+  hisVideo: {
+    width: '100%',
   },
 }));
 
@@ -136,8 +163,8 @@ function VideoChat() {
     setCall(false);
     setHangup(true);
     const getUserMedia = navigator.getUserMedia
-                      || navigator.webkitGetUserMedia
-                      || navigator.mozGetUserMedia;
+      || navigator.webkitGetUserMedia
+      || navigator.mozGetUserMedia;
     getUserMedia({ video: true, audio: true }, (stream) => {
       peerConnection.callEmitted = peerConnection.peer.call(receiver, stream);
       peerConnection.callEmitted.on('stream', (remoteStream) => {
@@ -178,43 +205,71 @@ function VideoChat() {
 
   return (
     <div>
-      <ButtonGroup size="large" color="primary" aria-label="large outlined primary button group">
-        <Button onClick={start} disabled={!startAvailable}>
-          Start
-        </Button>
-        <Button onClick={call} disabled={!callAvailable}>
-          Call
-        </Button>
-        <Button onClick={hangUp} disabled={!hangupAvailable}>
-          Hang Up
-        </Button>
-      </ButtonGroup>
       <form className={classes.root} onSubmit={(e) => { e.preventDefault(); }}>
-        <TextField
-          error={errors.sender !== 'no error'}
-          helperText={errors.sender !== 'no error' ? errors.sender : ''}
-          label="Username"
-          variant="outlined"
-          value={sender}
-          disabled={!startAvailable}
-          onChange={(e) => { setSender(e.target.value); }}
-        />
-        <TextField
-          error={errors.receiver !== 'no error'}
-          helperText={errors.receiver !== 'no error' ? errors.receiver : ''}
-          label="Receiver"
-          variant="outlined"
-          value={receiver}
-          disabled={!startAvailable}
-          onChange={(e) => { setReceiver(e.target.value); }}
-        />
+        <Box className={classes.headerChat}>
+          <Grid container direction="row" justify="center" alignItems="center">
+            <Grid item xs={12} sm={5}>
+              <Box className={classes.containerInput}>
+                <TextField
+                  className={classes.input}
+                  error={errors.sender !== 'no error'}
+                  helperText={errors.sender !== 'no error' ? errors.sender : ''}
+                  label="Username"
+                  variant="outlined"
+                  value={sender}
+                  disabled={!startAvailable}
+                  onChange={(e) => { setSender(e.target.value); }}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={5}>
+              <Box className={classes.containerInput}>
+                <TextField
+                  className={classes.input}
+                  error={errors.receiver !== 'no error'}
+                  helperText={errors.receiver !== 'no error' ? errors.receiver : ''}
+                  label="Receiver"
+                  variant="outlined"
+                  value={receiver}
+                  disabled={!startAvailable}
+                  onChange={(e) => { setReceiver(e.target.value); }}
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={1}>
+              <Box className={classes.gridHeader}>
+                <IconButton aria-label="start" onClick={start} disabled={!startAvailable} className={classes.icon}>
+                  <PlayCircleFilledWhiteIcon fontSize="large" />
+                </IconButton>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
       </form>
-      <video ref={localVideoRef} autoPlay muted>
-        <track kind="captions" srcLang="en" label="english_captions" />
-      </video>
-      <video ref={remoteVideoRef} autoPlay>
-        <track kind="captions" srcLang="en" label="english_captions" />
-      </video>
+      <Box className="container-video">
+        <Box className="box-video">
+          <Grid container direction="row" justify="space-evenly" alignItems="center">
+            <Grid item xs={10} sm={5} className="grid-video-mobile">
+              <video ref={localVideoRef} autoPlay muted className="local-video">
+                <track kind="captions" srcLang="en" label="english_captions" />
+              </video>
+            </Grid>
+            <Grid item xs={10} sm={5} className="grid-video-mobile">
+              <video ref={remoteVideoRef} autoPlay className="remote-video">
+                <track kind="captions" srcLang="en" label="english_captions" />
+              </video>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+      <Box className="video-command">
+        <IconButton aria-label="call" onClick={call} disabled={!callAvailable} className="btn-call">
+          <CallIcon />
+        </IconButton>
+        <IconButton aria-label="hangup" onClick={hangUp} disabled={!hangupAvailable} className="btn-hangup">
+          <CallEndRoundedIcon />
+        </IconButton>
+      </Box>
       <Dialog
         open={openModal}
         TransitionComponent={Transition}

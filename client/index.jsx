@@ -9,6 +9,7 @@ import Header from './components/Header/Header';
 import DataChat from './components/DataChat/DataChat';
 import './assets/scss/main.scss';
 import VideoChat from './components/VideoChat/VideoChat';
+import Home from './components/Home/Home';
 
 const Index = () => (
   <div className="container">
@@ -22,7 +23,7 @@ const Index = () => (
           <VideoChat />
         </Route>
         <Route path="/">
-          <div>Coucou c&apos;est la page home</div>
+          <Home />
         </Route>
         <Route>
           <div>Error 404</div>
