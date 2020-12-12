@@ -51,41 +51,68 @@
     }
   }
 
-  .paper-list {
-    max-width: 100vw;
+  .link-container {
+    margin: 2rem 0;
 
-    .paper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 2rem;
-      margin: 2rem 0;
-      border-radius: 20px;
-      transition: 0.3s;
+    .paper-list {
+      max-width: 100vw;
 
-      img {
-        width: 75px;
-        transition: 0.3s;
-      }
-
-      .text {
-        color: #4389a2;
-        text-align: center;
-        text-transform: uppercase;
-        font-size: 1.7rem;
-        font-weight: bold;
-        font-family: 'Luckiest Guy', cursive;
-        letter-spacing: 0.2rem;
-        margin-bottom: 0.5rem;
-      }
-
-      &:hover {
-        transform: scale(1.1);
+      .paper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 2rem;
+        border-radius: 20px;
         transition: 0.3s;
 
         img {
-          transform: scale(1.05);
+          width: 75px;
           transition: 0.3s;
+        }
+
+        .text {
+          color: #4389a2;
+          text-align: center;
+          text-transform: uppercase;
+          font-size: 1.7rem;
+          font-weight: bold;
+          font-family: 'Luckiest Guy', cursive;
+          letter-spacing: 0.2rem;
+          margin-bottom: 0.5rem;
+        }
+
+        &:hover {
+          transform: scale(1.1);
+          transition: 0.3s;
+
+          img {
+            transform: scale(1.05);
+            transition: 0.3s;
+          }
+        }
+      }
+    }
+
+    
+    &.disabled {
+      cursor: not-allowed;
+      
+      .paper-list {
+        pointer-events: none;
+        .text {
+          color: #5e5e5e;
+        }
+        
+        img {
+          filter: grayscale(1);
+        }
+        
+        &:hover {
+          transform: scale(1);
+          
+          img {
+            transform: scale(1);
+          }
         }
       }
     }

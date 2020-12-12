@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   HashRouter as Router,
   Switch,
@@ -11,26 +11,30 @@ import './assets/scss/main.scss';
 import VideoChat from './components/VideoChat/VideoChat';
 import Home from './components/Home/Home';
 
-const Index = () => (
-  <div className="container">
-    <Router>
-      <Header />
-      <Switch>
-        <Route path="/data-chat">
-          <DataChat />
-        </Route>
-        <Route path="/video-chat">
-          <VideoChat />
-        </Route>
-        <Route path="/">
-          <Home />
-        </Route>
-        <Route>
-          <div>Error 404</div>
-        </Route>
-      </Switch>
-    </Router>
-  </div>
-);
+const Index = () => {
+  const [user, setUser] = useState('');
+
+  return (
+    <div className="container">
+      <Router>
+        <Header />
+        <Switch>
+          <Route exact path="/data-chat">
+            <DataChat user={user} />
+          </Route>
+          <Route exact path="/video-chat">
+            <VideoChat user={user} />
+          </Route>
+          <Route exact path="/">
+            <Home user={user} setUser={setUser} />
+          </Route>
+          <Route>
+            <div>Error 404</div>
+          </Route>
+        </Switch>
+      </Router>
+    </div>
+  );
+};
 
 ReactDOM.render(<Index />, document.getElementById('root'));
