@@ -1,73 +1,43 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import Grid from '@material-ui/core/Grid';
 import { Link } from 'react-router-dom';
-import VoiceChatIcon from '@material-ui/icons/VoiceChat';
-import ChatIcon from '@material-ui/icons/Chat';
-
-const useStyles = makeStyles({
-  homeContainer: {
-    fontFamily: 'Raleway, Arial',
-    display: 'flex',
-    minHeight: '90vh',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  appLogo: {
-    maxWidth: '200px',
-    display: 'block',
-    margin: '2rem auto',
-  },
-  boardLogo: {
-    height: '50px',
-    paddingRight: '2rem',
-  },
-  paperList: {
-    width: '500px',
-    maxWidth: '100vw',
-  },
-  icon: {
-    fontSize: '4rem',
-    color: 'white',
-    textShadow: '0px 0px 8px rgba(150, 150, 150, 1)',
-  },
-  paper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '2rem 2rem',
-    margin: '2rem 0',
-    borderRadius: '20px',
-    background: 'linear-gradient(to right, #5c258d, #4389a2)',
-  },
-  text: {
-    color: 'white',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    fontSize: '1.5rem',
-    fontWeight: 'bold',
-    textShadow: '0px 0px 8px rgba(50, 50, 50, 1)',
-  },
-});
+import TextLogo from '../../assets/images/text_logo.png';
+import CallLogo from '../../assets/images/call_logo.png';
 
 function Home() {
-  const classes = useStyles();
-
   return (
-    <div className={classes.homeContainer}>
-      <Link to="/data-chat" className={classes.paperList}>
-        <Paper elevation={3} className={classes.paper}>
-          <ChatIcon className={classes.icon} />
-          <p className={classes.text}>Text session</p>
-        </Paper>
-      </Link>
-      <Link to="/video-chat" className={classes.paperList}>
-        <Paper elevation={3} className={classes.paper}>
-          <VoiceChatIcon className={classes.icon} />
-          <p className={classes.text}>Call session</p>
-        </Paper>
-      </Link>
+    <div className="home-container">
+      <h1>&#60;divscord/&#62;</h1>
+      <h3>To start a session please enter a username :</h3>
+      <OutlinedInput
+        variant="outlined"
+        // value={}
+        // onChange={}
+        // onKeyPress={}
+        className="input-username"
+        placeholder="Your username..."
+      />
+      <Grid container direction="row" justify="space-evenly" alignItems="center">
+        <Grid item xs={10} sm={3}>
+          <Link to="/data-chat" className="paper-list">
+            <Paper elevation={3} className="paper">
+              <img className="app-logo" src={TextLogo} alt="Logo text" />
+              <p className="text">Text session</p>
+            </Paper>
+          </Link>
+        </Grid>
+        <Grid item xs={10} sm={3}>
+          <Link to="/video-chat" className="paper-list">
+            <Paper elevation={3} className="paper">
+              <img className="app-logo" src={CallLogo} alt="Logo call" />
+              <p className="text">Call session</p>
+            </Paper>
+          </Link>
+        </Grid>
+      </Grid>
     </div>
   );
 }

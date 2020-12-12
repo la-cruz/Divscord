@@ -1,0 +1,93 @@
+.home-container {
+  display: flex;
+  min-height: 90vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to right, #5c258d, #4389a2);
+
+  h1 {
+    color: white;
+    font-size: 6rem;
+    font-family: 'Luckiest Guy', cursive;
+    margin: 0.3rem auto;
+  }
+
+  h3 {
+    color: white;
+    font-size: 1.5rem;
+    font-family: 'Luckiest Guy', cursive;
+    letter-spacing: 0.2rem;
+    margin: 2rem;
+  }
+
+  .input-username {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: 30%;
+    margin-bottom: 4rem;
+    text-align: center;
+
+    &.MuiOutlinedInput-root {
+      & fieldset {
+        text-align: center;
+        border: solid 3px white;
+      }
+      
+      &:hover fieldset {
+        border-color: #5c258d;
+      }
+      
+      &.Mui-focused fieldset {
+        border-color: #4389a2;
+      }
+    }
+
+    input {
+      text-align: center;
+      font-family: 'Luckiest Guy', cursive;
+      letter-spacing: 0.2rem;
+    }
+  }
+
+  .paper-list {
+    max-width: 100vw;
+
+    .paper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 2rem;
+      margin: 2rem 0;
+      border-radius: 20px;
+      transition: 0.3s;
+
+      img {
+        width: 75px;
+        transition: 0.3s;
+      }
+
+      .text {
+        color: #4389a2;
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 1.7rem;
+        font-weight: bold;
+        font-family: 'Luckiest Guy', cursive;
+        letter-spacing: 0.2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      &:hover {
+        transform: scale(1.1);
+        transition: 0.3s;
+
+        img {
+          transform: scale(1.05);
+          transition: 0.3s;
+        }
+      }
+    }
+  }
+}
