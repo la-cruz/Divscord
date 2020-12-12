@@ -114,7 +114,6 @@ function VideoChat() {
             disconnect();
             break;
           case 'CALLING':
-            console.log('je reçoi le message de call');
             setOpenModal(true);
             break;
           default:
@@ -140,14 +139,12 @@ function VideoChat() {
                       || navigator.webkitGetUserMedia
                       || navigator.mozGetUserMedia;
     getUserMedia({ video: true, audio: true }, (stream) => {
-      console.log('jenvoie un call');
       peerConnection.callEmitted = peerConnection.peer.call(receiver, stream);
       peerConnection.callEmitted.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
       });
 
       if (!openModal) {
-        console.log('jenvoie le message de call');
         peerConnection.connection.send({
           type: 'CALLING',
         });
@@ -157,7 +154,6 @@ function VideoChat() {
     });
 
     peerConnection.peer.on('call', (callReceived) => {
-      console.log('je reçois un call');
       getUserMedia({ video: true, audio: true }, (stream) => {
         callReceived.answer(stream);
         callReceived.on('stream', (remoteStream) => {
