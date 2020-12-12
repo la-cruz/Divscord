@@ -43,4 +43,4 @@ Bouton send en dehors du bouton group pour des problème d'ux/ui
 passage des 3 bool en 1
 Changement de sens de la caméra ( effet miroir )
 cut du mediaStream lors du disconnect
-
+check if user is connected

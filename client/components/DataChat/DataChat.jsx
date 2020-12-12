@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import TextField from '@material-ui/core/TextField';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import Box from '@material-ui/core/Box';
@@ -59,13 +61,12 @@ const peerConnection = {
   connection: null,
 };
 
-function DataChat() {
+function DataChat({ user }) {
   const classes = useStyles();
   const [isConnected, setIsConnected] = useState(false);
   const [isChating, setIsChating] = useState(false);
   const [isReceiverTyping, setIsReceiverTyping] = useState(false);
   const [isSenderTyping, setIsSenderTyping] = useState(false);
-  const [sender, setSender] = useState('');
   const [receiver, setReceiver] = useState('');
   const [message, setMessage] = useState('');
   const [messageList, setMessageList] = useState([]);
@@ -97,25 +98,11 @@ function DataChat() {
     }
   }, [message]);
 
-  const start = () => {
-    const newErrors = {
-      sender: sender === '' ? 'Empty username' : 'no error',
-      receiver: receiver === '' ? 'Empty receiver' : 'no error',
-      message: 'no error',
-    };
-
-    setErrors(newErrors);
-
-    if (newErrors.sender !== 'no error' || newErrors.receiver !== 'no error') {
-      return;
-    }
-
-    setIsConnected(true);
-
-    peerConnection.peer = newPeerConnection(sender);
-    peerConnection.connection = peerConnection.peer.connect(receiver);
-
+  useEffect(() => {
+    peerConnection.peer = newPeerConnection(user);
     peerConnection.peer.on('connection', (conn) => {
+      console.log(user, ' connected to ', receiver);
+
       setIsChating(true);
       conn.on('data', (data) => {
         switch (data.type) {
@@ -143,6 +130,25 @@ function DataChat() {
         }
       });
     });
+  }, []);
+
+  console.log(user);
+
+  const start = () => {
+    const newErrors = {
+      receiver: receiver === '' ? 'Empty receiver' : 'no error',
+      message: 'no error',
+    };
+
+    setErrors(newErrors);
+
+    if (newErrors.receiver !== 'no error') {
+      return;
+    }
+
+    setIsConnected(true);
+
+    peerConnection.connection = peerConnection.peer.connect(receiver);
   };
 
   const send = () => {
@@ -180,24 +186,19 @@ function DataChat() {
 
   return (
     <div>
+      {
+        user === ''
+        && (
+          <div className="unconnected-user">
+            <h3>You&apos;re not connected</h3>
+            <Link to="/" className="icon-btn">Go to Home</Link>
+          </div>
+        )
+      }
       <form className={classes.root} onSubmit={(e) => { e.preventDefault(); }}>
         <Box className={classes.headerChat}>
           <Grid container direction="row" justify="center" alignItems="center">
-            <Grid item xs={12} sm={4}>
-              <Box className={classes.containerInput}>
-                <TextField
-                  className={classes.input}
-                  error={errors.sender !== 'no error'}
-                  helperText={errors.sender !== 'no error' ? errors.sender : ''}
-                  label="Username"
-                  variant="outlined"
-                  value={sender}
-                  disabled={isConnected}
-                  onChange={(e) => { setSender(e.target.value); }}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={8}>
               <Box className={classes.containerInput}>
                 <TextField
                   className={classes.input}
@@ -269,5 +270,9 @@ function DataChat() {
     </div>
   );
 }
+
+DataChat.propTypes = {
+  user: PropTypes.string.isRequired,
+};
 
 export default DataChat;

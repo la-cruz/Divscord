@@ -17,24 +17,24 @@
     max-width: 50px;
     margin: 0 1rem;
   }
+}
 
-  .icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    text-transform: uppercase;
-    margin: 0 1rem;
-    padding: 0.5rem 1.5rem;
-    font-weight: bold;
-    border-radius: 50px;
-    background: linear-gradient(to right, #5c258d, #4389a2);
-    box-shadow: 0px 0px 8px rgba(150, 150, 150, 1);
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-transform: uppercase;
+  margin: 0 1rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: bold;
+  border-radius: 50px;
+  background: linear-gradient(to right, #5c258d, #4389a2);
+  box-shadow: 0px 0px 8px rgba(150, 150, 150, 1);
 
-    .icon {
-      margin-right: 0.5rem;
-      font-size: 1.5rem;
-      text-shadow: 0px 0px 3px rgba(150, 150, 150, 1);
-    }
+  .icon {
+    margin-right: 0.5rem;
+    font-size: 1.5rem;
+    text-shadow: 0px 0px 3px rgba(150, 150, 150, 1);
   }
 }
