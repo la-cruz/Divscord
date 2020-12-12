@@ -62,6 +62,8 @@ const peerConnection = {
 function DataChat() {
   const classes = useStyles();
   const [isConnected, setIsConnected] = useState(false);
+  const [isReceiverTyping, setIsReceiverTyping] = useState(false);
+  const [isSenderTyping, setIsSenderTyping] = useState(false);
   const [sender, setSender] = useState('');
   const [receiver, setReceiver] = useState('');
   const [message, setMessage] = useState('');
@@ -79,6 +81,20 @@ function DataChat() {
   };
 
   useEffect(scrollToBottom, [messageList]);
+
+  useEffect(() => {
+    if (message.length > 0 && !isSenderTyping) {
+      setIsSenderTyping(true);
+      peerConnection.connection.send({
+        type: 'ISTYPING',
+      });
+    } else if (isSenderTyping && message.length === 0) {
+      setIsSenderTyping(false);
+      peerConnection.connection.send({
+        type: 'NOLONGERTYPING',
+      });
+    }
+  }, [message]);
 
   const start = () => {
     const newErrors = {
@@ -98,18 +114,29 @@ function DataChat() {
     peerConnection.peer = newPeerConnection(sender);
     peerConnection.connection = peerConnection.peer.connect(receiver);
 
-    peerConnection.peer.on('connection', () => { console.log('connected to ', receiver); });
-
     peerConnection.peer.on('connection', (conn) => {
       conn.on('data', (data) => {
-        console.log('message : ', data);
-
-        if (data.type === 'MESSAGE') {
-          const newMessage = {
-            author: false,
-            message: data.data,
-          };
-          setMessageList((oldArray) => [...oldArray, newMessage]);
+        switch (data.type) {
+          case 'MESSAGE':
+            setIsReceiverTyping(false);
+            setMessageList((oldArray) => [...oldArray, {
+              author: false,
+              message: data.data,
+            }]);
+            break;
+          case 'DISCONNECT':
+            peerConnection.peer.disconnect();
+            setIsReceiverTyping(false);
+            setIsConnected(false);
+            break;
+          case 'ISTYPING':
+            setIsReceiverTyping(true);
+            break;
+          case 'NOLONGERTYPING':
+            setIsReceiverTyping(false);
+            break;
+          default:
+            break;
         }
       });
     });
@@ -134,6 +161,9 @@ function DataChat() {
   };
 
   const hangUp = () => {
+    peerConnection.connection.send({
+      type: 'DISCONNECT',
+    });
     peerConnection.peer.disconnect();
     setIsConnected(false);
   };
@@ -200,6 +230,10 @@ function DataChat() {
               ))
             }
             <div ref={endOfContainer} />
+            {
+              isReceiverTyping
+              && <span className="other">...</span>
+            }
           </div>
           <Box className="input-msg">
             <OutlinedInput
