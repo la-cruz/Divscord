@@ -6,12 +6,12 @@ import AppLogo from '../../assets/images/app_logo.png';
 
 const useStyles = makeStyles({
   headerContainer: {
-    position: 'fixed',
     width: '100vw',
     fontFamily: 'Raleway, Arial',
     display: 'flex',
-    height: '10vh',
+    flexBasis: '100px',
     alignItems: 'center',
+    padding: '1rem 0',
     justifyContent: 'space-between',
   },
   appLogo: {

@@ -9,7 +9,7 @@ const useStyles = makeStyles({
   homeContainer: {
     fontFamily: 'Raleway, Arial',
     display: 'flex',
-    minHeight: '100vh',
+    minHeight: '90vh',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
@@ -38,10 +38,12 @@ const useStyles = makeStyles({
     alignItems: 'center',
     padding: '2rem 2rem',
     margin: '2rem 0',
+    borderRadius: '20px',
     background: 'linear-gradient(to right, #5c258d, #4389a2)',
   },
-  textList: {
+  text: {
     color: 'white',
+    textAlign: 'center',
     textTransform: 'uppercase',
     fontSize: '1.5rem',
     fontWeight: 'bold',
@@ -57,13 +59,13 @@ function Home() {
       <Link to="/data-chat" className={classes.paperList}>
         <Paper elevation={3} className={classes.paper}>
           <ChatIcon className={classes.icon} />
-          <p className={classes.textList}>Text session</p>
+          <p className={classes.text}>Text session</p>
         </Paper>
       </Link>
       <Link to="/video-chat" className={classes.paperList}>
         <Paper elevation={3} className={classes.paper}>
           <VoiceChatIcon className={classes.icon} />
-          <p className={classes.textList}>Call session</p>
+          <p className={classes.text}>Call session</p>
         </Paper>
       </Link>
     </div>
