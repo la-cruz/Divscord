@@ -101,8 +101,6 @@ function DataChat({ user }) {
   useEffect(() => {
     peerConnection.peer = newPeerConnection(user);
     peerConnection.peer.on('connection', (conn) => {
-      console.log(user, ' connected to ', receiver);
-
       setIsChating(true);
       conn.on('data', (data) => {
         switch (data.type) {
@@ -131,8 +129,6 @@ function DataChat({ user }) {
       });
     });
   }, []);
-
-  console.log(user);
 
   const start = () => {
     const newErrors = {

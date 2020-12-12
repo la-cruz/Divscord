@@ -1,5 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
@@ -57,16 +59,15 @@ const peerConnection = {
   callReceived: null,
 };
 
-function VideoChat() {
+function VideoChat({ user }) {
   const classes = useStyles();
   const localVideoRef = useRef();
   const localStreamRef = useRef();
   const remoteVideoRef = useRef();
   const [openModal, setOpenModal] = useState(false);
-  const [startAvailable, setStart] = useState(true);
+  const [openRefusedModal, setRefusedModal] = useState(false);
   const [callAvailable, setCall] = useState(false);
   const [hangupAvailable, setHangup] = useState(false);
-  const [sender, setSender] = useState('');
   const [receiver, setReceiver] = useState('');
   const [errors, setErrors] = useState({
     sender: 'no error',
@@ -106,26 +107,54 @@ function VideoChat() {
 
     gotRemoteStream(null);
     gotStream(null);
-    setStart(true);
     setCall(false);
     setHangup(false);
   };
 
-  const start = () => {
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+        video: true,
+      })
+      .then(gotStream)
+      .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
+
+    peerConnection.peer = newPeerConnection(user);
+    peerConnection.peer.on('connection', (conn) => {
+      conn.on('data', (data) => {
+        switch (data.type) {
+          case 'DISCONNECT':
+            disconnect();
+            break;
+          case 'CALLING':
+            if (callAvailable) {
+              setOpenModal(true);
+              setReceiver(data.author);
+            }
+            break;
+          case 'REFUSED':
+            setCall(true);
+            setHangup(false);
+            setRefusedModal(true);
+            break;
+          default:
+            break;
+        }
+      });
+    });
+  }, []);
+
+  const call = () => {
     const newErrors = {
-      sender: sender === '' ? 'Empty username' : 'no error',
       receiver: receiver === '' ? 'Empty receiver' : 'no error',
       message: 'no error',
     };
 
     setErrors(newErrors);
 
-    if (newErrors.sender !== 'no error' || newErrors.receiver !== 'no error') {
+    if (newErrors.receiver !== 'no error') {
       return;
-    }
-
-    if (peerConnection.peer === null) {
-      peerConnection.peer = newPeerConnection(sender);
     }
 
     if (peerConnection.connection === null) {
@@ -134,32 +163,15 @@ function VideoChat() {
       peerConnection.connection = peerConnection.peer.reconnect(receiver);
     }
 
-    peerConnection.peer.on('connection', (conn) => {
-      conn.on('data', (data) => {
-        switch (data.type) {
-          case 'DISCONNECT':
-            disconnect();
-            break;
-          case 'CALLING':
-            setOpenModal(true);
-            break;
-          default:
-            break;
-        }
-      });
-    });
+    setTimeout(() => {
+      if (!openModal) {
+        peerConnection.connection.send({
+          type: 'CALLING',
+          author: user,
+        });
+      }
+    }, 1000);
 
-    setStart(false);
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: true,
-        video: true,
-      })
-      .then(gotStream)
-      .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
-  };
-
-  const call = () => {
     setCall(false);
     setHangup(true);
     const getUserMedia = navigator.getUserMedia
@@ -170,12 +182,6 @@ function VideoChat() {
       peerConnection.callEmitted.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
       });
-
-      if (!openModal) {
-        peerConnection.connection.send({
-          type: 'CALLING',
-        });
-      }
     }, (err) => {
       console.log('Failed to get local stream', err);
     });
@@ -200,29 +206,34 @@ function VideoChat() {
   };
 
   const cancelCall = () => {
+    if (peerConnection.connection === null) {
+      peerConnection.connection = peerConnection.peer.connect(receiver);
+    }
 
+    setReceiver('');
+
+    setTimeout(() => {
+      peerConnection.connection.send({
+        type: 'REFUSED',
+      });
+    }, 1000);
   };
 
   return (
     <div>
+      {
+        user === ''
+        && (
+          <div className="unconnected-user">
+            <h3>You&apos;re not connected</h3>
+            <Link to="/" className="icon-btn">Go to Home</Link>
+          </div>
+        )
+      }
       <form className={classes.root} onSubmit={(e) => { e.preventDefault(); }}>
         <Box className={classes.headerChat}>
           <Grid container direction="row" justify="center" alignItems="center">
-            <Grid item xs={12} sm={5}>
-              <Box className={classes.containerInput}>
-                <TextField
-                  className={classes.input}
-                  error={errors.sender !== 'no error'}
-                  helperText={errors.sender !== 'no error' ? errors.sender : ''}
-                  label="Username"
-                  variant="outlined"
-                  value={sender}
-                  disabled={!startAvailable}
-                  onChange={(e) => { setSender(e.target.value); }}
-                />
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={5}>
+            <Grid item xs={12} sm={10}>
               <Box className={classes.containerInput}>
                 <TextField
                   className={classes.input}
@@ -231,14 +242,14 @@ function VideoChat() {
                   label="Receiver"
                   variant="outlined"
                   value={receiver}
-                  disabled={!startAvailable}
+                  disabled={!callAvailable}
                   onChange={(e) => { setReceiver(e.target.value); }}
                 />
               </Box>
             </Grid>
             <Grid item xs={12} sm={1}>
               <Box className={classes.gridHeader}>
-                <IconButton aria-label="start" onClick={start} disabled={!startAvailable} className={classes.icon}>
+                <IconButton aria-label="start" onClick={call} disabled={!callAvailable} className={classes.icon}>
                   <PlayCircleFilledWhiteIcon fontSize="large" />
                 </IconButton>
               </Box>
@@ -280,7 +291,7 @@ function VideoChat() {
       >
         <DialogTitle id="alert-dialog-slide-title">
           { receiver }
-          wants to call
+          {' wants to call'}
         </DialogTitle>
         <DialogActions>
           <Button onClick={() => { cancelCall(); setOpenModal(false); }} color="primary">
@@ -291,7 +302,30 @@ function VideoChat() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={openRefusedModal}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={() => { setRefusedModal(false); }}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle id="alert-dialog-slide-title">
+          { receiver }
+          {' refused your call'}
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => { setRefusedModal(false); }} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
+
+VideoChat.propTypes = {
+  user: PropTypes.string.isRequired,
+};
+
 export default VideoChat;
