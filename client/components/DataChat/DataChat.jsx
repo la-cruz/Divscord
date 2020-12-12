@@ -62,6 +62,7 @@ const peerConnection = {
 function DataChat() {
   const classes = useStyles();
   const [isConnected, setIsConnected] = useState(false);
+  const [isChating, setIsChating] = useState(false);
   const [isReceiverTyping, setIsReceiverTyping] = useState(false);
   const [isSenderTyping, setIsSenderTyping] = useState(false);
   const [sender, setSender] = useState('');
@@ -115,6 +116,7 @@ function DataChat() {
     peerConnection.connection = peerConnection.peer.connect(receiver);
 
     peerConnection.peer.on('connection', (conn) => {
+      setIsChating(true);
       conn.on('data', (data) => {
         switch (data.type) {
           case 'MESSAGE':
@@ -126,6 +128,7 @@ function DataChat() {
             break;
           case 'DISCONNECT':
             peerConnection.peer.disconnect();
+            setIsChating(false);
             setIsReceiverTyping(false);
             setIsConnected(false);
             break;
@@ -245,12 +248,14 @@ function DataChat() {
               onKeyPress={(e) => { handleSpacePress(e); }}
               className={classes.inputContent}
               placeholder="Message..."
+              disabled={!isChating}
               endAdornment={(
                 <InputAdornment position="end">
                   <IconButton
                     aria-label="send message"
                     onClick={send}
                     edge="end"
+                    disabled={!isChating}
                     className={classes.iconSend}
                   >
                     <SendIcon />
