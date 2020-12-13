@@ -122,30 +122,27 @@ function VideoChat({ user }) {
       peerConnection.callReceived.close();
     }
 
-    // if (localStreamRef.current) {
-    //   localStreamRef.current.getTracks().forEach((track) => {
-    //     track.stop();
-    //   });
-    // }
+    peerConnection.peer.disconnect();
 
     gotRemoteStream(null);
+    setIsMute(false);
+    setRemoteIsMute(false);
+    setIsWithoutCam(false);
+    setRemoteIsWithoutCam(false);
     setCall(true);
     setHangup(false);
+
+    peerConnection.peer = null;
+    peerConnection.connection = null;
   };
 
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: true,
-        video: true,
-      })
-      .then(gotStream)
-      .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
-
+  const connect = () => {
     if (peerConnection.peer === null && user !== '') {
       peerConnection.peer = newPeerConnection(user.toLowerCase());
       peerConnection.peer.on('connection', (conn) => {
         conn.on('data', (data) => {
+          console.log('j\'ai reçu un message : ', data);
+          console.log('la ref de mon modal : ', callRef.current);
           switch (data.type) {
             case 'DISCONNECT':
               disconnect();
@@ -175,6 +172,18 @@ function VideoChat({ user }) {
         });
       });
     }
+  };
+
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({
+        audio: true,
+        video: true,
+      })
+      .then(gotStream)
+      .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
+
+    connect();
   }, []);
 
   const call = () => {
@@ -188,6 +197,10 @@ function VideoChat({ user }) {
       return;
     }
 
+    if (peerConnection.peer === null) {
+      connect();
+    }
+
     if (peerConnection.connection === null || peerConnection.connection === undefined) {
       peerConnection.connection = peerConnection.peer.connect(receiver.toLowerCase());
     } else if (peerConnection.connection.peerConnection.connectionState !== 'connected') {
@@ -195,7 +208,11 @@ function VideoChat({ user }) {
     }
 
     setTimeout(() => {
-      if (!openModal) {
+      console.log('call Available : ', callAvailable);
+
+      if (callAvailable) {
+        console.log('j\'envoie le calling');
+
         peerConnection.connection.send({
           type: 'CALLING',
           author: user,

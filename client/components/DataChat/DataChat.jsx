@@ -81,6 +81,47 @@ function DataChat({ user }) {
     endOfContainer.current.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const disconnect = () => {
+    peerConnection.peer.disconnect();
+    setIsConnected(false);
+    setIsChating(false);
+    peerConnection.peer = null;
+    peerConnection.connection = null;
+    setMessageList([]);
+  };
+
+  const connect = () => {
+    if (peerConnection.peer === null && user !== '') {
+      peerConnection.peer = newPeerConnection(user.toLowerCase());
+      peerConnection.peer.on('connection', (conn) => {
+        setIsChating(true);
+        conn.on('data', (data) => {
+          switch (data.type) {
+            case 'MESSAGE':
+              setIsReceiverTyping(false);
+              setMessageList((oldArray) => [...oldArray, {
+                author: false,
+                message: data.data,
+              }]);
+              break;
+            case 'DISCONNECT':
+              setIsReceiverTyping(false);
+              disconnect();
+              break;
+            case 'ISTYPING':
+              setIsReceiverTyping(true);
+              break;
+            case 'NOLONGERTYPING':
+              setIsReceiverTyping(false);
+              break;
+            default:
+              break;
+          }
+        });
+      });
+    }
+  };
+
   useEffect(scrollToBottom, [messageList]);
 
   useEffect(() => {
@@ -98,36 +139,7 @@ function DataChat({ user }) {
   }, [message]);
 
   useEffect(() => {
-    if (peerConnection.peer === null && user !== '') {
-      peerConnection.peer = newPeerConnection(user.toLowerCase());
-      peerConnection.peer.on('connection', (conn) => {
-        setIsChating(true);
-        conn.on('data', (data) => {
-          switch (data.type) {
-            case 'MESSAGE':
-              setIsReceiverTyping(false);
-              setMessageList((oldArray) => [...oldArray, {
-                author: false,
-                message: data.data,
-              }]);
-              break;
-            case 'DISCONNECT':
-              peerConnection.peer.disconnect();
-              setIsReceiverTyping(false);
-              setIsConnected(false);
-              break;
-            case 'ISTYPING':
-              setIsReceiverTyping(true);
-              break;
-            case 'NOLONGERTYPING':
-              setIsReceiverTyping(false);
-              break;
-            default:
-              break;
-          }
-        });
-      });
-    }
+    connect();
   }, []);
 
   const start = () => {
@@ -139,6 +151,10 @@ function DataChat({ user }) {
 
     if (newErrors.receiver !== 'no error') {
       return;
+    }
+
+    if (peerConnection.peer === null) {
+      connect();
     }
 
     setIsConnected(true);
@@ -170,8 +186,7 @@ function DataChat({ user }) {
 
   const hangUp = () => {
     peerConnection.connection.send({ type: 'DISCONNECT' });
-    peerConnection.peer.disconnect();
-    setIsConnected(false);
+    disconnect();
   };
 
   const handleEnterPress = (e) => {
