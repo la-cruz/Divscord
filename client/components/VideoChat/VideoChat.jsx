@@ -118,11 +118,6 @@ function VideoChat({ user }) {
     gotRemoteStream(null);
     setCall(true);
     setHangup(false);
-    window.location = '/';
-  };
-
-  const cutVideo = () => {
-    localStreamRef.current.getVideoTracks()[0].enabled = false;
   };
 
   useEffect(() => {
