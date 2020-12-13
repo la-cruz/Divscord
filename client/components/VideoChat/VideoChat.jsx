@@ -13,11 +13,13 @@ import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
+import RingVolumeIcon from '@material-ui/icons/RingVolume';
+import PhoneMissedIcon from '@material-ui/icons/PhoneMissed';
+import CheckIcon from '@material-ui/icons/Check';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
-import Button from '@material-ui/core/Button';
 import newPeerConnection from '../../lib/newPeerConnection';
 import soundUrl from '../../assets/sounds/ringtone.mp3';
 
@@ -76,6 +78,8 @@ function VideoChat({ user }) {
   const [receiver, setReceiver] = useState('');
   const [isMute, setIsMute] = useState(false);
   const [isWithoutCam, setIsWithoutCam] = useState(false);
+  const [remoteIsMute, setRemoteIsMute] = useState(false);
+  const [remoteIsWithoutCam, setRemoteIsWithoutCam] = useState(false);
   const [errors, setErrors] = useState({
     sender: 'no error',
     receiver: 'no error',
@@ -159,9 +163,11 @@ function VideoChat({ user }) {
               break;
             case 'MUTE':
               remoteVideoRef.current.srcObject.getAudioTracks()[0].enabled = !data.state;
+              setRemoteIsMute(data.state);
               break;
             case 'CUT-CAM':
               remoteVideoRef.current.srcObject.getVideoTracks()[0].enabled = !data.state;
+              setRemoteIsWithoutCam(data.state);
               break;
             default:
               break;
@@ -258,6 +264,7 @@ function VideoChat({ user }) {
       type: 'CUT-CAM',
       state: !isWithoutCam,
     });
+    localStreamRef.current.getVideoTracks()[0].enabled = isWithoutCam;
     setIsWithoutCam(!isWithoutCam);
   };
 
@@ -304,6 +311,18 @@ function VideoChat({ user }) {
               <video ref={remoteVideoRef} autoPlay className="remote-video">
                 <track kind="captions" srcLang="en" label="english_captions" />
               </video>
+              <div className="icon-remote">
+                {
+                  remoteIsMute && (
+                    <MicOffIcon />
+                  )
+                }
+                {
+                  remoteIsWithoutCam && (
+                    <VideocamOffIcon />
+                  )
+                }
+              </div>
             </Grid>
           </Grid>
         </Box>
@@ -336,18 +355,20 @@ function VideoChat({ user }) {
         onClose={() => { setOpenModal(false); }}
         aria-labelledby="alert-dialog-slide-title"
         aria-describedby="alert-dialog-slide-description"
+        className="modal-dialog"
       >
-        <DialogTitle id="alert-dialog-slide-title">
+        <RingVolumeIcon className="icon-head" />
+        <DialogTitle id="alert-dialog-slide-title" className="container-text">
           { receiver }
           {' wants to call'}
         </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => { cancelCall(); setOpenModal(false); }} color="primary">
-            Hang up
-          </Button>
-          <Button onClick={() => { call(); setOpenModal(false); }} color="primary">
-            Pick up
-          </Button>
+        <DialogActions className="container-btn">
+          <IconButton aria-label="call" onClick={() => { call(); setOpenModal(false); }} className="btn-call">
+            <CallIcon />
+          </IconButton>
+          <IconButton aria-label="hangup" onClick={() => { cancelCall(); setOpenModal(false); }} className="btn-hangup">
+            <CallEndRoundedIcon />
+          </IconButton>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -357,15 +378,17 @@ function VideoChat({ user }) {
         onClose={() => { setRefusedModal(false); }}
         aria-labelledby="alert-dialog-slide-title"
         aria-describedby="alert-dialog-slide-description"
+        className="modal-dialog"
       >
-        <DialogTitle id="alert-dialog-slide-title">
+        <PhoneMissedIcon className="icon-head miss-call" />
+        <DialogTitle id="alert-dialog-slide-title" className="container-text">
           { receiver }
           {' refused your call'}
         </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => { setRefusedModal(false); }} color="primary">
-            OK
-          </Button>
+        <DialogActions className="container-btn">
+          <IconButton aria-label="call-miss" onClick={() => { setRefusedModal(false); }} className="btn-miss">
+            <CheckIcon />
+          </IconButton>
         </DialogActions>
       </Dialog>
     </div>

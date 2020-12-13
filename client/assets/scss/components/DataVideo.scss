@@ -14,19 +14,39 @@ video {
     justify-content: space-evenly;
     overflow-y: auto;
     flex-basis: calc(100vh - 258px);
-    
-    .local-video, .remote-video {
+
+    .local-video,
+    .remote-video {
       width: 100%;
     }
 
-    
+    .grid-video-mobile {
+      position: relative;
+    }
+
+    .icon-remote {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      display: flex;
+      justify-content: center;
+      background-color: #b43e2f;
+      border-radius: 50px;
+      color: white;
+      margin: 0.2rem;
+
+      svg {
+        padding: 0.2rem 0.5rem;
+      }
+    }
+
     @media (max-width: 600px) {
       flex-basis: calc(100vh - 255px);
-      
+
       .grid-video-mobile {
         display: flex;
         justify-content: center;
-        
+
         .local-video {
           max-width: 50%;
         }
@@ -50,10 +70,10 @@ video {
   justify-content: center;
   align-items: center;
   padding: 0.2rem 0;
-  box-shadow: 0px -2px 2px 0 rgba(0, 0, 0, .10);
+  box-shadow: 0px -2px 2px 0 rgba(0, 0, 0, 0.1);
 
   button {
-    box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, .10);
+    box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.1);
     margin: 0 1rem;
     width: 50px;
     height: 50px;
@@ -64,8 +84,9 @@ video {
     &.btn-cam {
       color: white;
     }
-    
-    &.btn-call, &.btn-hangup {
+
+    &.btn-call,
+    &.btn-hangup {
       &:disabled {
         background-color: grey;
         border: solid 3px grey;
@@ -77,13 +98,14 @@ video {
       background-color: #34b434;
       border: solid 3px #34b434;
     }
-    
+
     &.btn-hangup {
       background-color: #b43e2f;
       border: solid 3px #b43e2f;
     }
 
-    &.btn-mic, &.btn-cam {
+    &.btn-mic,
+    &.btn-cam {
       border: solid 3px #4389a2;
       color: #4389a2;
 
