@@ -19,7 +19,6 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
-import Button from '@material-ui/core/Button';
 import newPeerConnection from '../../lib/newPeerConnection';
 
 const Transition = React.forwardRef((props, ref) => (
@@ -77,6 +76,8 @@ function VideoChat({ user }) {
   const [receiver, setReceiver] = useState('');
   const [isMute, setIsMute] = useState(false);
   const [isWithoutCam, setIsWithoutCam] = useState(false);
+  const [remoteIsMute, setRemoteIsMute] = useState(false);
+  const [remoteIsWithoutCam, setRemoteIsWithoutCam] = useState(false);
   const [errors, setErrors] = useState({
     sender: 'no error',
     receiver: 'no error',
@@ -153,9 +154,11 @@ function VideoChat({ user }) {
               break;
             case 'MUTE':
               remoteVideoRef.current.srcObject.getAudioTracks()[0].enabled = !data.state;
+              setRemoteIsMute(data.state);
               break;
             case 'CUT-CAM':
               remoteVideoRef.current.srcObject.getVideoTracks()[0].enabled = !data.state;
+              setRemoteIsWithoutCam(data.state);
               break;
             default:
               break;
@@ -253,11 +256,9 @@ function VideoChat({ user }) {
       type: 'CUT-CAM',
       state: !isWithoutCam,
     });
+    localStreamRef.current.getVideoTracks()[0].enabled = isWithoutCam;
     setIsWithoutCam(!isWithoutCam);
   };
-
-  console.log(isMute);
-  console.log(isWithoutCam);
 
   return (
     <div>
@@ -302,6 +303,18 @@ function VideoChat({ user }) {
               <video ref={remoteVideoRef} autoPlay className="remote-video">
                 <track kind="captions" srcLang="en" label="english_captions" />
               </video>
+              <div className="icon-remote">
+                {
+                  remoteIsMute && (
+                    <MicOffIcon />
+                  )
+                }
+                {
+                  remoteIsWithoutCam && (
+                    <VideocamOffIcon />
+                  )
+                }
+              </div>
             </Grid>
           </Grid>
         </Box>
