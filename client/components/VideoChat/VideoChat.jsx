@@ -165,6 +165,7 @@ function VideoChat({ user }) {
         video: true,
       })
       .then(gotStream)
+      // eslint-disable-next-line no-alert
       .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
 
     connect();
@@ -192,10 +193,6 @@ function VideoChat({ user }) {
     }
 
     setTimeout(() => {
-      console.log(!isResponse);
-      console.log(callAvailable);
-      console.log(callAvailable && !isResponse);
-
       if (callAvailable && !isResponse) {
         setWaitingModal(true);
         peerConnection.connection.send({
@@ -218,6 +215,7 @@ function VideoChat({ user }) {
         setWaitingModal(false);
       });
     }, (err) => {
+      // eslint-disable-next-line no-console
       console.log('Failed to get local stream', err);
     });
 
@@ -231,6 +229,7 @@ function VideoChat({ user }) {
 
         peerConnection.callReceived = callReceived;
       }, (err) => {
+        // eslint-disable-next-line no-console
         console.log('Failed to get local stream', err);
       });
     });
