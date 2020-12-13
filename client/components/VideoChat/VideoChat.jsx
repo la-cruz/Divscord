@@ -40,6 +40,7 @@ function VideoChat({ user }) {
   const remoteVideoRef = useRef();
   const [openModal, setOpenModal] = useState(false);
   const [openRefusedModal, setRefusedModal] = useState(false);
+  const [openWaitingModal, setWaitingModal] = useState(false);
   const [callAvailable, _setCall] = useState(true);
   const [hangupAvailable, setHangup] = useState(false);
   const [receiver, setReceiver] = useState('');
@@ -55,12 +56,12 @@ function VideoChat({ user }) {
   const [play, { stop }] = useSound(soundUrl);
 
   useEffect(() => {
-    if (openModal) {
+    if (openModal || openWaitingModal) {
       play();
     } else {
       stop();
     }
-  }, [openModal]);
+  }, [openModal, openWaitingModal]);
 
   const setCall = (data) => {
     callRef.current = data;
@@ -77,6 +78,44 @@ function VideoChat({ user }) {
 
     if (remoteVideo.srcObject !== remoteStream) {
       remoteVideo.srcObject = remoteStream;
+    }
+  };
+
+  const connect = () => {
+    if (peerConnection.peer === null && user !== '') {
+      peerConnection.peer = newPeerConnection(user.toLowerCase());
+      peerConnection.peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+          switch (data.type) {
+            case 'DISCONNECT':
+              // eslint-disable-next-line no-use-before-define
+              disconnect();
+              break;
+            case 'CALLING':
+              if (callRef.current) {
+                setOpenModal(true);
+                setReceiver(data.author);
+              }
+              break;
+            case 'REFUSED':
+              setCall(true);
+              setHangup(false);
+              setRefusedModal(true);
+              setWaitingModal(false);
+              break;
+            case 'MUTE':
+              remoteVideoRef.current.srcObject.getAudioTracks()[0].enabled = !data.state;
+              setRemoteIsMute(data.state);
+              break;
+            case 'CUT-CAM':
+              remoteVideoRef.current.srcObject.getVideoTracks()[0].enabled = !data.state;
+              setRemoteIsWithoutCam(data.state);
+              break;
+            default:
+              break;
+          }
+        });
+      });
     }
   };
 
@@ -101,44 +140,8 @@ function VideoChat({ user }) {
 
     peerConnection.peer = null;
     peerConnection.connection = null;
-  };
 
-  const connect = () => {
-    if (peerConnection.peer === null && user !== '') {
-      peerConnection.peer = newPeerConnection(user.toLowerCase());
-      peerConnection.peer.on('connection', (conn) => {
-        conn.on('data', (data) => {
-          console.log('j\'ai reçu un message : ', data);
-          console.log('la ref de mon modal : ', callRef.current);
-          switch (data.type) {
-            case 'DISCONNECT':
-              disconnect();
-              break;
-            case 'CALLING':
-              if (callRef.current) {
-                setOpenModal(true);
-                setReceiver(data.author);
-              }
-              break;
-            case 'REFUSED':
-              setCall(true);
-              setHangup(false);
-              setRefusedModal(true);
-              break;
-            case 'MUTE':
-              remoteVideoRef.current.srcObject.getAudioTracks()[0].enabled = !data.state;
-              setRemoteIsMute(data.state);
-              break;
-            case 'CUT-CAM':
-              remoteVideoRef.current.srcObject.getVideoTracks()[0].enabled = !data.state;
-              setRemoteIsWithoutCam(data.state);
-              break;
-            default:
-              break;
-          }
-        });
-      });
-    }
+    connect();
   };
 
   useEffect(() => {
@@ -153,7 +156,7 @@ function VideoChat({ user }) {
     connect();
   }, []);
 
-  const call = () => {
+  const call = (isResponse) => {
     const newErrors = {
       receiver: receiver === '' ? 'Empty receiver' : 'no error',
     };
@@ -175,11 +178,12 @@ function VideoChat({ user }) {
     }
 
     setTimeout(() => {
-      console.log('call Available : ', callAvailable);
+      console.log(!isResponse);
+      console.log(callAvailable);
+      console.log(callAvailable && !isResponse);
 
-      if (callAvailable) {
-        console.log('j\'envoie le calling');
-
+      if (callAvailable && !isResponse) {
+        setWaitingModal(true);
         peerConnection.connection.send({
           type: 'CALLING',
           author: user,
@@ -197,6 +201,7 @@ function VideoChat({ user }) {
       peerConnection.callEmitted = peerConnection.peer.call(receiver, stream);
       peerConnection.callEmitted.on('stream', (remoteStream) => {
         gotRemoteStream(remoteStream);
+        setWaitingModal(false);
       });
     }, (err) => {
       console.log('Failed to get local stream', err);
@@ -207,6 +212,7 @@ function VideoChat({ user }) {
         callReceived.answer(stream);
         callReceived.on('stream', (remoteStream) => {
           gotRemoteStream(remoteStream);
+          setWaitingModal(false);
         });
 
         peerConnection.callReceived = callReceived;
@@ -312,7 +318,7 @@ function VideoChat({ user }) {
         </Box>
       </Box>
       <Box className="video-command">
-        <IconButton aria-label="call" onClick={call} disabled={!callAvailable} className="btn-call">
+        <IconButton aria-label="call" onClick={() => call(false)} disabled={!callAvailable} className="btn-call">
           <CallIcon />
         </IconButton>
         <IconButton aria-label="hangup" onClick={hangUp} disabled={!hangupAvailable} className="btn-hangup">
@@ -347,7 +353,7 @@ function VideoChat({ user }) {
           {' wants to call'}
         </DialogTitle>
         <DialogActions className="container-btn">
-          <IconButton aria-label="call" onClick={() => { call(); setOpenModal(false); }} className="btn-call">
+          <IconButton aria-label="call" onClick={() => { call(true); setOpenModal(false); }} className="btn-call">
             <CallIcon />
           </IconButton>
           <IconButton aria-label="hangup" onClick={() => { cancelCall(); setOpenModal(false); }} className="btn-hangup">
@@ -374,6 +380,20 @@ function VideoChat({ user }) {
             <CheckIcon />
           </IconButton>
         </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openWaitingModal}
+        TransitionComponent={Transition}
+        keepMounted
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+        className="modal-dialog"
+      >
+        <RingVolumeIcon className="icon-head" />
+        <DialogTitle id="alert-dialog-slide-title" className="container-text">
+          {'You\'re calling '}
+          { receiver }
+        </DialogTitle>
       </Dialog>
     </div>
   );
