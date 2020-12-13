@@ -45,7 +45,7 @@ function Header({ user }) {
           !homeLocation && (
             <Link to="/" className="icon-btn">
               <HomeIcon className="icon" />
-              Home
+              <span>HOME</span>
             </Link>
           )
         }

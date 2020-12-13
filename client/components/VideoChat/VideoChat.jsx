@@ -8,7 +8,10 @@ import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import CallIcon from '@material-ui/icons/Call';
 import CallEndRoundedIcon from '@material-ui/icons/CallEndRounded';
-import PlayCircleFilledWhiteIcon from '@material-ui/icons/PlayCircleFilledWhite';
+import MicIcon from '@material-ui/icons/Mic';
+import MicOffIcon from '@material-ui/icons/MicOff';
+import VideocamIcon from '@material-ui/icons/Videocam';
+import VideocamOffIcon from '@material-ui/icons/VideocamOff';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -69,6 +72,8 @@ function VideoChat({ user }) {
   const [callAvailable, _setCall] = useState(true);
   const [hangupAvailable, setHangup] = useState(false);
   const [receiver, setReceiver] = useState('');
+  const [isMute, setIsMute] = useState(false);
+  const [isWithoutCam, setIsWithoutCam] = useState(false);
   const [errors, setErrors] = useState({
     sender: 'no error',
     receiver: 'no error',
@@ -116,6 +121,10 @@ function VideoChat({ user }) {
     window.location = '/';
   };
 
+  const cutVideo = () => {
+    localStreamRef.current.getVideoTracks()[0].enabled = false;
+  };
+
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({
@@ -129,7 +138,6 @@ function VideoChat({ user }) {
       peerConnection.peer = newPeerConnection(user);
       peerConnection.peer.on('connection', (conn) => {
         conn.on('data', (data) => {
-          console.log('j\'ai reçu un message : ', data);
           switch (data.type) {
             case 'DISCONNECT':
               disconnect();
@@ -144,6 +152,12 @@ function VideoChat({ user }) {
               setCall(true);
               setHangup(false);
               setRefusedModal(true);
+              break;
+            case 'MUTE':
+              remoteVideoRef.current.srcObject.getAudioTracks()[0].enabled = !data.state;
+              break;
+            case 'CUT-CAM':
+              remoteVideoRef.current.srcObject.getVideoTracks()[0].enabled = !data.state;
               break;
             default:
               break;
@@ -182,6 +196,7 @@ function VideoChat({ user }) {
 
     setCall(false);
     setHangup(true);
+
     const getUserMedia = navigator.getUserMedia
       || navigator.webkitGetUserMedia
       || navigator.mozGetUserMedia;
@@ -227,6 +242,25 @@ function VideoChat({ user }) {
     }, 1000);
   };
 
+  const mute = () => {
+    peerConnection.connection.send({
+      type: 'MUTE',
+      state: !isMute,
+    });
+    setIsMute(!isMute);
+  };
+
+  const cutCam = () => {
+    peerConnection.connection.send({
+      type: 'CUT-CAM',
+      state: !isWithoutCam,
+    });
+    setIsWithoutCam(!isWithoutCam);
+  };
+
+  console.log(isMute);
+  console.log(isWithoutCam);
+
   return (
     <div>
       {
@@ -255,13 +289,6 @@ function VideoChat({ user }) {
                 />
               </Box>
             </Grid>
-            <Grid item xs={12} sm={1}>
-              <Box className={classes.gridHeader}>
-                <IconButton aria-label="start" onClick={call} disabled={!callAvailable} className={classes.icon}>
-                  <PlayCircleFilledWhiteIcon fontSize="large" />
-                </IconButton>
-              </Box>
-            </Grid>
           </Grid>
         </Box>
       </form>
@@ -288,6 +315,19 @@ function VideoChat({ user }) {
         <IconButton aria-label="hangup" onClick={hangUp} disabled={!hangupAvailable} className="btn-hangup">
           <CallEndRoundedIcon />
         </IconButton>
+        {
+          hangupAvailable
+          && (
+            <>
+              <IconButton aria-label="mute" onClick={mute} className={isMute ? 'btn-mic off' : 'btn-mic'}>
+                { isMute ? <MicOffIcon /> : <MicIcon /> }
+              </IconButton>
+              <IconButton aria-label="video" onClick={cutCam} className={isWithoutCam ? 'btn-cam off' : 'btn-cam'}>
+                { isWithoutCam ? <VideocamOffIcon /> : <VideocamIcon /> }
+              </IconButton>
+            </>
+          )
+        }
       </Box>
       <Dialog
         open={openModal}
