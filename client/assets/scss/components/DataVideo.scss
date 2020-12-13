@@ -1,116 +1,129 @@
-video {
-  transform: scaleX(-1);
-  border-radius: 5px;
-}
+.root-video {
+  min-height: 10vh;
+  flex-grow: 1;
 
-.container-video {
-  display: flex;
-  flex-direction: column;
+  .header-video {
+    flex-basis: 100px;
+    width: 100%;
 
-  .box-video {
-    background-color: #1f1f1f;
-    padding: 1rem;
-    display: flex;
-    justify-content: space-evenly;
-    overflow-y: auto;
-    flex-basis: calc(100vh - 258px);
+    .container-input {
+      padding: 0.5rem 0.5rem;
 
-    .local-video,
-    .remote-video {
-      width: 100%;
-    }
-
-    .grid-video-mobile {
-      position: relative;
-    }
-
-    .icon-remote {
-      position: absolute;
-      bottom: 1rem;
-      right: 1rem;
-      display: flex;
-      justify-content: center;
-      background-color: #b43e2f;
-      border-radius: 50px;
-      color: white;
-      margin: 0.2rem;
-
-      svg {
-        padding: 0.2rem 0.5rem;
+      .input-header {
+        padding: 0.5rem 0.5rem;
       }
     }
+  }
 
-    @media (max-width: 600px) {
-      flex-basis: calc(100vh - 255px);
+  .container-video {
+    display: flex;
+    flex-direction: column;
+
+    .box-video {
+      background-color: #1f1f1f;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-evenly;
+      overflow-y: auto;
+      flex-basis: calc(100vh - 258px);
+
+      .local-video,
+      .remote-video {
+        width: 100%;
+      }
 
       .grid-video-mobile {
+        position: relative;
+      }
+
+      .icon-remote {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
         display: flex;
         justify-content: center;
+        background-color: #b43e2f;
+        border-radius: 50px;
+        color: white;
+        margin: 0.2rem;
 
-        .local-video {
-          max-width: 50%;
+        svg {
+          padding: 0.2rem 0.5rem;
         }
+      }
 
-        .remote-video {
-          max-width: 100%;
+      @media (max-width: 600px) {
+        flex-basis: calc(100vh - 255px);
+
+        .grid-video-mobile {
+          display: flex;
+          justify-content: center;
+
+          .local-video {
+            max-width: 50%;
+          }
+
+          .remote-video {
+            max-width: 100%;
+          }
         }
       }
     }
   }
-}
 
-.video-command {
-  background-color: white;
-  position: fixed;
-  bottom: 0;
-  width: 100vw;
-  flex-basis: 10vh;
-  min-height: 10vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0.2rem 0;
-  box-shadow: 0px -2px 2px 0 rgba(0, 0, 0, 0.1);
+  .video-command {
+    background-color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    flex-basis: 10vh;
+    min-height: 10vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.2rem 0;
+    box-shadow: 0px -2px 2px 0 rgba(0, 0, 0, 0.1);
 
-  button {
-    box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.1);
-    margin: 0 1rem;
-    width: 50px;
-    height: 50px;
+    button {
+      box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.1);
+      margin: 0 1rem;
+      width: 50px;
+      height: 50px;
 
-    &.btn-call,
-    &.btn-hangup,
-    &.btn-mic,
-    &.btn-cam {
-      color: white;
-    }
-
-    &.btn-call,
-    &.btn-hangup {
-      &:disabled {
-        background-color: grey;
-        border: solid 3px grey;
+      &.btn-call,
+      &.btn-hangup,
+      &.btn-mic,
+      &.btn-cam {
         color: white;
       }
-    }
 
-    &.btn-call {
-      background-color: #34b434;
-      border: solid 3px #34b434;
-    }
+      &.btn-call,
+      &.btn-hangup {
+        &:disabled {
+          background-color: grey;
+          border: solid 3px grey;
+          color: white;
+        }
+      }
 
-    &.btn-hangup {
-      background-color: #b43e2f;
-      border: solid 3px #b43e2f;
-    }
+      &.btn-call {
+        background-color: #34b434;
+        border: solid 3px #34b434;
+      }
 
-    &.btn-mic,
-    &.btn-cam {
-      border: solid 3px #4389a2;
-      color: #4389a2;
+      &.btn-hangup {
+        background-color: #b43e2f;
+        border: solid 3px #b43e2f;
+      }
 
-      &.off {
-        color: #b43e2f;
+      &.btn-mic,
+      &.btn-cam {
+        border: solid 3px #4389a2;
+        color: #4389a2;
+
+        &.off {
+          color: #b43e2f;
+        }
       }
     }
   }

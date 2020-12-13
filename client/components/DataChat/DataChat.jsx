@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import TextField from '@material-ui/core/TextField';
@@ -13,56 +12,12 @@ import PlayCircleFilledWhiteIcon from '@material-ui/icons/PlayCircleFilledWhite'
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import newPeerConnection from '../../lib/newPeerConnection';
 
-const useStyles = makeStyles(() => ({
-  root: {
-    minHeight: '10vh',
-    flexGrow: 1,
-  },
-  headerChat: {
-    flexBasis: '100px',
-    width: '100%',
-  },
-  containerInput: {
-    padding: '0.5rem 0.5rem',
-  },
-  gridHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    color: '#4389a2',
-    '&:disabled': {
-      color: 'grey',
-    },
-  },
-  iconStop: {
-    color: '#C70039',
-    '&:disabled': {
-      color: 'grey',
-    },
-  },
-  input: {
-    width: '100%',
-  },
-  inputContent: {
-    width: '80%',
-    margin: '0.2rem 0',
-    padding: 'auto 1rem',
-  },
-  iconSend: {
-    marginRight: '-0.5rem',
-    color: '#5c258d',
-  },
-}));
-
 const peerConnection = {
   peer: null,
   connection: null,
 };
 
 function DataChat({ user }) {
-  const classes = useStyles();
   const [isConnected, setIsConnected] = useState(false);
   const [isChating, setIsChating] = useState(false);
   const [isReceiverTyping, setIsReceiverTyping] = useState(false);
@@ -197,13 +152,13 @@ function DataChat({ user }) {
           </div>
         )
       }
-      <form className={classes.root} onSubmit={(e) => { e.preventDefault(); }}>
-        <Box className={classes.headerChat}>
+      <form className="root-data" onSubmit={(e) => { e.preventDefault(); }}>
+        <Box className="header-chat">
           <Grid container direction="row" justify="center" alignItems="center">
             <Grid item xs={12} sm={8}>
-              <Box className={classes.containerInput}>
+              <Box className="container-input">
                 <TextField
-                  className={classes.input}
+                  className="input-header"
                   error={errors.receiver !== 'no error'}
                   helperText={errors.receiver !== 'no error' ? errors.receiver : ''}
                   label="Receiver"
@@ -215,11 +170,11 @@ function DataChat({ user }) {
               </Box>
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Box className={classes.gridHeader}>
-                <IconButton aria-label="start" onClick={start} disabled={isConnected} className={classes.icon}>
+              <Box className="grid-header">
+                <IconButton aria-label="start" onClick={start} disabled={isConnected} className="icon-start-header">
                   <PlayCircleFilledWhiteIcon fontSize="large" />
                 </IconButton>
-                <IconButton aria-label="hangup" onClick={hangUp} disabled={!isConnected} className={classes.iconStop}>
+                <IconButton aria-label="hangup" onClick={hangUp} disabled={!isConnected} className="icon-stop-header">
                   <HighlightOffIcon fontSize="large" />
                 </IconButton>
               </Box>
@@ -255,7 +210,7 @@ function DataChat({ user }) {
               value={message}
               onChange={(e) => { setMessage(e.target.value); }}
               onKeyPress={(e) => { handleSpacePress(e); }}
-              className={classes.inputContent}
+              className="input-content"
               placeholder="Message..."
               disabled={!isChating || !isConnected}
               endAdornment={(
@@ -265,7 +220,7 @@ function DataChat({ user }) {
                     onClick={send}
                     edge="end"
                     disabled={!isChating || !isConnected}
-                    className={classes.iconSend}
+                    className="icon-send"
                   >
                     <SendIcon />
                   </IconButton>

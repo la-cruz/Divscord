@@ -1,5 +1,4 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
@@ -26,37 +25,6 @@ const Transition = React.forwardRef((props, ref) => (
   <Slide direction="up" ref={ref} {...props} />
 ));
 
-const useStyles = makeStyles(() => ({
-  root: {
-    minHeight: '10vh',
-    flexGrow: 1,
-  },
-  headerChat: {
-    flexBasis: '100px',
-    width: '100%',
-  },
-  containerInput: {
-    padding: '0.5rem 0.5rem',
-  },
-  input: {
-    width: '100%',
-  },
-  gridHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    color: '#4389a2',
-    '&:disabled': {
-      color: 'grey',
-    },
-  },
-  hisVideo: {
-    width: '100%',
-  },
-}));
-
 const peerConnection = {
   peer: null,
   connection: null,
@@ -65,7 +33,6 @@ const peerConnection = {
 };
 
 function VideoChat({ user }) {
-  const classes = useStyles();
   const localVideoRef = useRef();
   const localStreamRef = useRef();
   const remoteVideoRef = useRef();
@@ -271,13 +238,13 @@ function VideoChat({ user }) {
           </div>
         )
       }
-      <form className={classes.root} onSubmit={(e) => { e.preventDefault(); }}>
-        <Box className={classes.headerChat}>
+      <form className="root-video" onSubmit={(e) => { e.preventDefault(); }}>
+        <Box className="header-video">
           <Grid container direction="row" justify="center" alignItems="center">
             <Grid item xs={12} sm={10}>
-              <Box className={classes.containerInput}>
+              <Box className="container-input">
                 <TextField
-                  className={classes.input}
+                  className="input-header"
                   error={errors.receiver !== 'no error'}
                   helperText={errors.receiver !== 'no error' ? errors.receiver : ''}
                   label="Receiver"
