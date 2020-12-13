@@ -66,17 +66,22 @@ function VideoChat({ user }) {
   const remoteVideoRef = useRef();
   const [openModal, setOpenModal] = useState(false);
   const [openRefusedModal, setRefusedModal] = useState(false);
-  const [callAvailable, setCall] = useState(false);
+  const [callAvailable, _setCall] = useState(true);
   const [hangupAvailable, setHangup] = useState(false);
   const [receiver, setReceiver] = useState('');
   const [errors, setErrors] = useState({
     sender: 'no error',
     receiver: 'no error',
   });
+  const callRef = useRef(callAvailable);
+
+  const setCall = (data) => {
+    callRef.current = data;
+    _setCall(data);
+  };
 
   const gotStream = (stream) => {
     localVideoRef.current.srcObject = stream;
-    setCall(true); // On fait en sorte d'activer le bouton permettant de commencer un appel
     localStreamRef.current = stream;
   };
 
@@ -106,9 +111,9 @@ function VideoChat({ user }) {
     }
 
     gotRemoteStream(null);
-    gotStream(null);
-    setCall(false);
+    setCall(true);
     setHangup(false);
+    window.location = '/';
   };
 
   useEffect(() => {
@@ -120,29 +125,32 @@ function VideoChat({ user }) {
       .then(gotStream)
       .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
 
-    peerConnection.peer = newPeerConnection(user);
-    peerConnection.peer.on('connection', (conn) => {
-      conn.on('data', (data) => {
-        switch (data.type) {
-          case 'DISCONNECT':
-            disconnect();
-            break;
-          case 'CALLING':
-            if (callAvailable) {
-              setOpenModal(true);
-              setReceiver(data.author);
-            }
-            break;
-          case 'REFUSED':
-            setCall(true);
-            setHangup(false);
-            setRefusedModal(true);
-            break;
-          default:
-            break;
-        }
+    if (peerConnection.peer === null && user !== '') {
+      peerConnection.peer = newPeerConnection(user);
+      peerConnection.peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+          console.log('j\'ai reçu un message : ', data);
+          switch (data.type) {
+            case 'DISCONNECT':
+              disconnect();
+              break;
+            case 'CALLING':
+              if (callRef.current) {
+                setOpenModal(true);
+                setReceiver(data.author);
+              }
+              break;
+            case 'REFUSED':
+              setCall(true);
+              setHangup(false);
+              setRefusedModal(true);
+              break;
+            default:
+              break;
+          }
+        });
       });
-    });
+    }
   }, []);
 
   const call = () => {
