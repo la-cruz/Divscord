@@ -8,7 +8,6 @@ import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import CallIcon from '@material-ui/icons/Call';
 import CallEndRoundedIcon from '@material-ui/icons/CallEndRounded';
-import PlayCircleFilledWhiteIcon from '@material-ui/icons/PlayCircleFilledWhite';
 import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import VideocamIcon from '@material-ui/icons/Videocam';
@@ -148,6 +147,12 @@ function VideoChat({ user }) {
             setHangup(false);
             setRefusedModal(true);
             break;
+          case 'MUTE':
+            remoteVideoRef.current.srcObject.getAudioTracks()[0].enabled = !data.state;
+            break;
+          case 'CUT-CAM':
+            remoteVideoRef.current.srcObject.getVideoTracks()[0].enabled = !data.state;
+            break;
           default:
             break;
         }
@@ -231,10 +236,18 @@ function VideoChat({ user }) {
   };
 
   const mute = () => {
+    peerConnection.connection.send({
+      type: 'MUTE',
+      state: !isMute,
+    });
     setIsMute(!isMute);
   };
 
   const cutCam = () => {
+    peerConnection.connection.send({
+      type: 'CUT-CAM',
+      state: !isWithoutCam,
+    });
     setIsWithoutCam(!isWithoutCam);
   };
 
