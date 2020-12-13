@@ -71,7 +71,6 @@ function DataChat({ user }) {
   const [message, setMessage] = useState('');
   const [messageList, setMessageList] = useState([]);
   const [errors, setErrors] = useState({
-    sender: 'no error',
     receiver: 'no error',
     message: 'no error',
   });
@@ -99,12 +98,8 @@ function DataChat({ user }) {
   }, [message]);
 
   useEffect(() => {
-    if (user !== '') {
-      if (peerConnection.peer === null) {
-        peerConnection.peer = newPeerConnection(user.toLowerCase());
-      } else if (peerConnection.peer.disconnected) {
-        peerConnection.peer.reconnect();
-      }
+    if (peerConnection.peer === null && user !== '') {
+      peerConnection.peer = newPeerConnection(user.toLowerCase());
       peerConnection.peer.on('connection', (conn) => {
         setIsChating(true);
         conn.on('data', (data) => {
@@ -118,7 +113,6 @@ function DataChat({ user }) {
               break;
             case 'DISCONNECT':
               peerConnection.peer.disconnect();
-              setIsChating(false);
               setIsReceiverTyping(false);
               setIsConnected(false);
               break;
@@ -139,7 +133,6 @@ function DataChat({ user }) {
   const start = () => {
     const newErrors = {
       receiver: receiver === '' ? 'Empty receiver' : 'no error',
-      message: 'no error',
     };
 
     setErrors(newErrors);
@@ -150,7 +143,11 @@ function DataChat({ user }) {
 
     setIsConnected(true);
 
-    peerConnection.connection = peerConnection.peer.connect(receiver.toLowerCase());
+    if (peerConnection.connection === null || peerConnection.connection === undefined) {
+      peerConnection.connection = peerConnection.peer.connect(receiver.toLowerCase());
+    } else if (peerConnection.connection.peerConnection.connectionState !== 'connected') {
+      peerConnection.connection = peerConnection.peer.reconnect(receiver.toLowerCase());
+    }
   };
 
   const send = () => {
@@ -172,14 +169,12 @@ function DataChat({ user }) {
   };
 
   const hangUp = () => {
-    peerConnection.connection.send({
-      type: 'DISCONNECT',
-    });
+    peerConnection.connection.send({ type: 'DISCONNECT' });
     peerConnection.peer.disconnect();
     setIsConnected(false);
   };
 
-  const handleSpacePress = (e) => {
+  const handleEnterPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       send();
@@ -254,7 +249,7 @@ function DataChat({ user }) {
               variant="outlined"
               value={message}
               onChange={(e) => { setMessage(e.target.value); }}
-              onKeyPress={(e) => { handleSpacePress(e); }}
+              onKeyPress={(e) => { handleEnterPress(e); }}
               className={classes.inputContent}
               placeholder="Message..."
               disabled={!isChating || !isConnected}

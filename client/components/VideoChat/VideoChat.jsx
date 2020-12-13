@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
+import useSound from 'use-sound';
 import { Link } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -18,6 +19,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import Button from '@material-ui/core/Button';
 import newPeerConnection from '../../lib/newPeerConnection';
+import soundUrl from '../../assets/sounds/ringtone.mp3';
 
 const Transition = React.forwardRef((props, ref) => (
   // eslint-disable-next-line react/jsx-props-no-spreading
@@ -79,6 +81,15 @@ function VideoChat({ user }) {
     receiver: 'no error',
   });
   const callRef = useRef(callAvailable);
+  const [play, { stop }] = useSound(soundUrl);
+
+  useEffect(() => {
+    if (openModal) {
+      play();
+    } else {
+      stop();
+    }
+  }, [openModal]);
 
   const setCall = (data) => {
     callRef.current = data;
@@ -107,13 +118,11 @@ function VideoChat({ user }) {
       peerConnection.callReceived.close();
     }
 
-    peerConnection.peer.disconnect();
-
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        track.stop();
-      });
-    }
+    // if (localStreamRef.current) {
+    //   localStreamRef.current.getTracks().forEach((track) => {
+    //     track.stop();
+    //   });
+    // }
 
     gotRemoteStream(null);
     setCall(true);
@@ -130,7 +139,7 @@ function VideoChat({ user }) {
       .catch((e) => { alert(`getUserMedia() error: ${e.name}`); });
 
     if (peerConnection.peer === null && user !== '') {
-      peerConnection.peer = newPeerConnection(user);
+      peerConnection.peer = newPeerConnection(user.toLowerCase());
       peerConnection.peer.on('connection', (conn) => {
         conn.on('data', (data) => {
           switch (data.type) {
@@ -165,7 +174,6 @@ function VideoChat({ user }) {
   const call = () => {
     const newErrors = {
       receiver: receiver === '' ? 'Empty receiver' : 'no error',
-      message: 'no error',
     };
 
     setErrors(newErrors);
@@ -174,10 +182,10 @@ function VideoChat({ user }) {
       return;
     }
 
-    if (peerConnection.connection === null) {
-      peerConnection.connection = peerConnection.peer.connect(receiver);
-    } else {
-      peerConnection.connection = peerConnection.peer.reconnect(receiver);
+    if (peerConnection.connection === null || peerConnection.connection === undefined) {
+      peerConnection.connection = peerConnection.peer.connect(receiver.toLowerCase());
+    } else if (peerConnection.connection.peerConnection.connectionState !== 'connected') {
+      peerConnection.connection = peerConnection.peer.reconnect(receiver.toLowerCase());
     }
 
     setTimeout(() => {
@@ -252,9 +260,6 @@ function VideoChat({ user }) {
     });
     setIsWithoutCam(!isWithoutCam);
   };
-
-  console.log(isMute);
-  console.log(isWithoutCam);
 
   return (
     <div>
