@@ -2,7 +2,7 @@
 
 
 
-![](/Users/mickael/Pictures/README TIW8.png)
+![](./client/assets/images/README_logo.png)
 
 
 
