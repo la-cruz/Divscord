@@ -12,6 +12,9 @@ import MicIcon from '@material-ui/icons/Mic';
 import MicOffIcon from '@material-ui/icons/MicOff';
 import VideocamIcon from '@material-ui/icons/Videocam';
 import VideocamOffIcon from '@material-ui/icons/VideocamOff';
+import RingVolumeIcon from '@material-ui/icons/RingVolume';
+import PhoneMissedIcon from '@material-ui/icons/PhoneMissed';
+import CheckIcon from '@material-ui/icons/Check';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -118,11 +121,6 @@ function VideoChat({ user }) {
     gotRemoteStream(null);
     setCall(true);
     setHangup(false);
-    window.location = '/';
-  };
-
-  const cutVideo = () => {
-    localStreamRef.current.getVideoTracks()[0].enabled = false;
   };
 
   useEffect(() => {
@@ -336,18 +334,20 @@ function VideoChat({ user }) {
         onClose={() => { setOpenModal(false); }}
         aria-labelledby="alert-dialog-slide-title"
         aria-describedby="alert-dialog-slide-description"
+        className="modal-dialog"
       >
-        <DialogTitle id="alert-dialog-slide-title">
+        <RingVolumeIcon className="icon-head" />
+        <DialogTitle id="alert-dialog-slide-title" className="container-text">
           { receiver }
           {' wants to call'}
         </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => { cancelCall(); setOpenModal(false); }} color="primary">
-            Hang up
-          </Button>
-          <Button onClick={() => { call(); setOpenModal(false); }} color="primary">
-            Pick up
-          </Button>
+        <DialogActions className="container-btn">
+          <IconButton aria-label="call" onClick={() => { call(); setOpenModal(false); }} className="btn-call">
+            <CallIcon />
+          </IconButton>
+          <IconButton aria-label="hangup" onClick={() => { cancelCall(); setOpenModal(false); }} className="btn-hangup">
+            <CallEndRoundedIcon />
+          </IconButton>
         </DialogActions>
       </Dialog>
       <Dialog
@@ -357,15 +357,17 @@ function VideoChat({ user }) {
         onClose={() => { setRefusedModal(false); }}
         aria-labelledby="alert-dialog-slide-title"
         aria-describedby="alert-dialog-slide-description"
+        className="modal-dialog"
       >
-        <DialogTitle id="alert-dialog-slide-title">
+        <PhoneMissedIcon className="icon-head miss-call" />
+        <DialogTitle id="alert-dialog-slide-title" className="container-text">
           { receiver }
           {' refused your call'}
         </DialogTitle>
-        <DialogActions>
-          <Button onClick={() => { setRefusedModal(false); }} color="primary">
-            OK
-          </Button>
+        <DialogActions className="container-btn">
+          <IconButton aria-label="call-miss" onClick={() => { setRefusedModal(false); }} className="btn-miss">
+            <CheckIcon />
+          </IconButton>
         </DialogActions>
       </Dialog>
     </div>

@@ -1,0 +1,51 @@
+.modal-dialog {
+  .icon-head {
+    margin: 1rem auto;
+    width: 75px;
+    height: 75px;
+    color: #4389a2;
+    -webkit-animation: mail-notify 2s ease-out infinite;
+    animation: mail-notify 2s ease-out infinite;
+    -webkit-transform-origin: center;
+    transform-origin: center;
+
+    &.miss-call {
+      color: #b43e2f;
+    }
+  }
+
+  .container-text {
+    h2 {
+      font-weight: bold;
+      text-align: center;
+    }
+  }
+
+  .container-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    padding: 1rem 0;
+
+    button {
+      box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.1);
+      width: 50px;
+      height: 50px;
+
+      &.btn-call {
+        background-color: #34b434;
+        color: white;
+      }
+
+      &.btn-hangup {
+        background-color: #b43e2f;
+        color: white;
+      }
+
+      &.btn-miss {
+        background-color: #4389a2;
+        color: white;
+      }
+    }
+  }
+}
