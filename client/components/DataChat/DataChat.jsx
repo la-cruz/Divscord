@@ -192,7 +192,7 @@ function DataChat({ user }) {
         user === ''
         && (
           <div className="unconnected-user">
-            <h3>You&apos;re not connected</h3>
+            <h3>You&apos;re not connected, please reconnect</h3>
             <Link to="/" className="icon-btn">Go to Home</Link>
           </div>
         )

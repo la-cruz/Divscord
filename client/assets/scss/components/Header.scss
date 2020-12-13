@@ -39,11 +39,26 @@
   }
 }
 
-.username-display {
-  font-size: 2rem;
-  font-family: 'Luckiest Guy', cursive;
-  background: linear-gradient(to right, #5c258d, #4389a2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: bold;
+.container-username {
+  display: flex;
+  align-items: f;
+
+  .username-display {
+    font-size: 2rem;
+    font-family: "Luckiest Guy", cursive;
+    background: linear-gradient(to right, #5c258d, #4389a2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    margin: 0 1rem;
+  }
+
+  .icon-copy {
+    fill: #4389a2;
+    cursor: pointer;
+  }
+
+  .icon-check {
+    fill: #129112;
+  }
 }
