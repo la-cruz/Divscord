@@ -13,7 +13,7 @@ function Header({ user }) {
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => { setIsCopied(false) }, 3000);
+    setTimeout(() => { setIsCopied(false); }, 3000);
   }, [isCopied]);
 
   return (
@@ -45,7 +45,7 @@ function Header({ user }) {
           !homeLocation && (
             <Link to="/" className="icon-btn">
               <HomeIcon className="icon" />
-              Home
+              <span>HOME</span>
             </Link>
           )
         }
