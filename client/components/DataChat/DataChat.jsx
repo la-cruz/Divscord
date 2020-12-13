@@ -79,6 +79,7 @@ function DataChat({ user }) {
 
   useEffect(scrollToBottom, [messageList]);
 
+  // Gestion de l'envoie des messages pour l'affichage des "..."
   useEffect(() => {
     if (message.length > 0 && !isSenderTyping) {
       setIsSenderTyping(true);
@@ -144,6 +145,7 @@ function DataChat({ user }) {
     disconnect();
   };
 
+  // Gestion de l'appuis sur shift + entrée pour pouvoir sauter une ligne dans l'input de message
   const handleEnterPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();

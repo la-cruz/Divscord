@@ -35,26 +35,39 @@ const peerConnection = {
 };
 
 function VideoChat({ user }) {
+  // Ref pour les stream vidéo
   const localVideoRef = useRef();
   const localStreamRef = useRef();
   const remoteVideoRef = useRef();
+
+  // State pour la gestion des modales
   const [openModal, setOpenModal] = useState(false);
   const [openRefusedModal, setRefusedModal] = useState(false);
   const [openWaitingModal, setWaitingModal] = useState(false);
+
+  // State pour la gestion de l'appel
   const [callAvailable, _setCall] = useState(true);
   const [hangupAvailable, setHangup] = useState(false);
+
+  // State pour géré l'interlocuteur
   const [receiver, setReceiver] = useState('');
+
+  // State pour les mutes / coupe caméra
   const [isMute, setIsMute] = useState(false);
   const [isWithoutCam, setIsWithoutCam] = useState(false);
   const [remoteIsMute, setRemoteIsMute] = useState(false);
   const [remoteIsWithoutCam, setRemoteIsWithoutCam] = useState(false);
+
   const [errors, setErrors] = useState({
     sender: 'no error',
     receiver: 'no error',
   });
   const callRef = useRef(callAvailable);
+
+  // Hook pour le son
   const [play, { stop }] = useSound(soundUrl);
 
+  // Déclanche et arrete la sonnerie au bon moment
   useEffect(() => {
     if (openModal || openWaitingModal) {
       play();
@@ -63,6 +76,7 @@ function VideoChat({ user }) {
     }
   }, [openModal, openWaitingModal]);
 
+  // Remplacement du setCall avec une reference pour pouvoir y accèder dans le listener
   const setCall = (data) => {
     callRef.current = data;
     _setCall(data);
