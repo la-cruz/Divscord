@@ -1,10 +1,6 @@
-# :earth_africa: &nbsp; TIW8 - TP3 Collaboration temps-réel
-
-
-
 ![](./client/assets/images/README_logo.png)
 
-
+# :earth_africa: &nbsp; TIW8 - TP3 Collaboration temps-réel
 
 ## 🤝 Membre du groupe
 
