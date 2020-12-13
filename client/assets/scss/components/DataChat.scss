@@ -132,6 +132,10 @@
         .icon-send {
           margin-right: -0.5rem;
           color: #5c258d;
+
+          &:disabled {
+            color: grey;
+          }
         }
       }
 
