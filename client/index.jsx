@@ -17,7 +17,7 @@ const Index = () => {
   return (
     <div className="container">
       <Router>
-        <Header />
+        <Header user={user} />
         <Switch>
           <Route exact path="/data-chat">
             <DataChat user={user} />

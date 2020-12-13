@@ -99,35 +99,41 @@ function DataChat({ user }) {
   }, [message]);
 
   useEffect(() => {
-    peerConnection.peer = newPeerConnection(user);
-    peerConnection.peer.on('connection', (conn) => {
-      setIsChating(true);
-      conn.on('data', (data) => {
-        switch (data.type) {
-          case 'MESSAGE':
-            setIsReceiverTyping(false);
-            setMessageList((oldArray) => [...oldArray, {
-              author: false,
-              message: data.data,
-            }]);
-            break;
-          case 'DISCONNECT':
-            peerConnection.peer.disconnect();
-            setIsChating(false);
-            setIsReceiverTyping(false);
-            setIsConnected(false);
-            break;
-          case 'ISTYPING':
-            setIsReceiverTyping(true);
-            break;
-          case 'NOLONGERTYPING':
-            setIsReceiverTyping(false);
-            break;
-          default:
-            break;
-        }
+    if (user !== '') {
+      if (peerConnection.peer === null) {
+        peerConnection.peer = newPeerConnection(user.toLowerCase());
+      } else if (peerConnection.peer.disconnected) {
+        peerConnection.peer.reconnect();
+      }
+      peerConnection.peer.on('connection', (conn) => {
+        setIsChating(true);
+        conn.on('data', (data) => {
+          switch (data.type) {
+            case 'MESSAGE':
+              setIsReceiverTyping(false);
+              setMessageList((oldArray) => [...oldArray, {
+                author: false,
+                message: data.data,
+              }]);
+              break;
+            case 'DISCONNECT':
+              peerConnection.peer.disconnect();
+              setIsChating(false);
+              setIsReceiverTyping(false);
+              setIsConnected(false);
+              break;
+            case 'ISTYPING':
+              setIsReceiverTyping(true);
+              break;
+            case 'NOLONGERTYPING':
+              setIsReceiverTyping(false);
+              break;
+            default:
+              break;
+          }
+        });
       });
-    });
+    }
   }, []);
 
   const start = () => {
@@ -144,7 +150,7 @@ function DataChat({ user }) {
 
     setIsConnected(true);
 
-    peerConnection.connection = peerConnection.peer.connect(receiver);
+    peerConnection.connection = peerConnection.peer.connect(receiver.toLowerCase());
   };
 
   const send = () => {
@@ -232,7 +238,13 @@ function DataChat({ user }) {
             <div ref={endOfContainer} />
             {
               isReceiverTyping
-              && <span className="other">...</span>
+              && (
+                <span className="other triple-dot">
+                  <span>.</span>
+                  <span>.</span>
+                  <span>.</span>
+                </span>
+              )
             }
           </div>
           <Box className="input-msg">
@@ -245,14 +257,14 @@ function DataChat({ user }) {
               onKeyPress={(e) => { handleSpacePress(e); }}
               className={classes.inputContent}
               placeholder="Message..."
-              disabled={!isChating}
+              disabled={!isChating || !isConnected}
               endAdornment={(
                 <InputAdornment position="end">
                   <IconButton
                     aria-label="send message"
                     onClick={send}
                     edge="end"
-                    disabled={!isChating}
+                    disabled={!isChating || !isConnected}
                     className={classes.iconSend}
                   >
                     <SendIcon />
